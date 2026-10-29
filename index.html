@@ -1,0 +1,2426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QUÍMICA - Enzimología Médica y Cinética (Facultad de Cs. Médicas - UCCuyo)</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- KaTeX for medical and biochemical LaTeX rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" 
+          onload="renderMathWhenReady()"></script>
+
+  <!-- Chart.js for precision kinetic & biomarker curves -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Fonts: Outfit & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: #f7f9f6;
+      color: #1e293b;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Paleta Institucional UCCuyo (Verde Oliva y Contrastes Biomédicos) */
+    .text-accent { color: #436600; }
+    .bg-accent { background-color: #436600; }
+    .bg-accent-hover:hover { background-color: #324d00; }
+    .bg-accent-light { background-color: #f1f6eb; }
+    .border-accent { border-color: #436600; }
+
+    .text-primary { color: #436600; }
+    .bg-primary { background-color: #436600; }
+    .bg-primary-dark { background-color: #324d00; }
+    .border-primary { border-color: #436600; }
+    
+    .focus-accent:focus {
+      border-color: #436600;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(67, 102, 0, 0.2);
+    }
+    
+    input[type=range] {
+      accent-color: #436600;
+    }
+
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 10px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .badge-katex .katex {
+      font-size: 1.05em;
+    }
+    .latex-eq {
+      font-size: 1.05rem;
+      overflow-x: auto;
+      padding: 0.25rem 0;
+    }
+    .energy-canvas {
+      cursor: crosshair;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-accent/20 text-gray-800">
+
+  <!-- Cabecera Institucional UCCuyo -->
+  <header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50 no-math">
+    <div class="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-accent flex items-center justify-center text-white font-bold text-xl shadow-md">
+          QUI
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold text-gray-800 tracking-wide uppercase">QUÍMICA GENERAL Y BIOLÓGICA</h1>
+          <p class="text-xs text-gray-500 font-semibold">Curso de Ingreso a Medicina (Facultad de Cs. Médicas - UCCuyo)</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <!-- Botón Vademécum Teórico -->
+        <button onclick="openFormulasModal()" class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-lg border border-gray-200 hover:bg-gray-200 transition">
+          <i class="fa-solid fa-book-bookmark text-accent"></i>
+          <span class="hidden sm:inline">Vademécum</span>
+        </button>
+        <!-- Botón Guía de Uso -->
+        <button onclick="openTutorial()" class="flex items-center gap-1.5 px-3 py-1.5 bg-accent text-white text-xs font-semibold rounded-lg shadow-sm hover:opacity-90 transition">
+          <i class="fa-solid fa-circle-question"></i>
+          <span>Guía de Uso</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenido Principal con Barra Lateral -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col lg:flex-row gap-6">
+    
+    <!-- Menú de Navegación Lateral -->
+    <nav class="w-full lg:w-64 shrink-0 lg:shrink-0 flex flex-row lg:flex-col gap-2 bg-white p-3 rounded-2xl shadow-sm border border-gray-200 overflow-x-auto lg:overflow-x-visible whitespace-nowrap lg:whitespace-normal sticky top-20 h-fit" id="navTabs">
+      <button onclick="switchTab('tab-termo')" id="btn-tab-termo" data-tab="tab-termo" class="nav-btn bg-accent text-white flex-1 lg:flex-none text-left py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold transition shadow-sm flex items-center gap-2">
+        <i class="fa-solid fa-bolt"></i> <span>1. Termodinámica & Cofactores</span>
+      </button>
+      <button onclick="switchTab('tab-nomenclatura')" id="btn-tab-nomenclatura" data-tab="tab-nomenclatura" class="nav-btn text-gray-700 hover:bg-gray-100 flex-1 lg:flex-none text-left py-2.5 px-4 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-2">
+        <i class="fa-solid fa-sitemap"></i> <span>2. Clasificación IUBMB</span>
+      </button>
+      <button onclick="switchTab('tab-sitio')" id="btn-tab-sitio" data-tab="tab-sitio" class="nav-btn text-gray-700 hover:bg-gray-100 flex-1 lg:flex-none text-left py-2.5 px-4 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-2">
+        <i class="fa-solid fa-key"></i> <span>3. Sitio Activo & Modelos</span>
+      </button>
+      <button onclick="switchTab('tab-cinetica')" id="btn-tab-cinetica" data-tab="tab-cinetica" class="nav-btn text-gray-700 hover:bg-gray-100 flex-1 lg:flex-none text-left py-2.5 px-4 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-2">
+        <i class="fa-solid fa-chart-line"></i> <span>4. Cinética Michaelis-Menten</span>
+      </button>
+      <button onclick="switchTab('tab-inhibicion')" id="btn-tab-inhibicion" data-tab="tab-inhibicion" class="nav-btn text-gray-700 hover:bg-gray-100 flex-1 lg:flex-none text-left py-2.5 px-4 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-2">
+        <i class="fa-solid fa-shield-halved"></i> <span>5. Inhibición & Alosterismo</span>
+      </button>
+      <button onclick="switchTab('tab-clinica')" id="btn-tab-clinica" data-tab="tab-clinica" data-last="true" class="nav-btn text-gray-700 hover:bg-gray-100 flex-1 lg:flex-none text-left py-2.5 px-4 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-2 border-t lg:border-t border-gray-100">
+        <i class="fa-solid fa-heart-pulse text-accent"></i> <span>6. Clínica & Biomarcadores</span>
+      </button>
+    </nav>
+
+    <!-- Área de Contenido Dinámico -->
+    <div class="flex-1 space-y-6 min-w-0">
+
+    <!-- ================= TAB 1: TERMODINÁMICA & COFACTORES ================= -->
+    <section id="tab-termo" class="tab-content space-y-8">
+      
+      <!-- Introducción / Banner -->
+      <div class="bg-gradient-to-r from-sky-900 via-sky-800 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="max-w-3xl">
+          <span class="inline-block px-3 py-1 bg-sky-500/20 border border-sky-400/30 rounded-full text-xs font-semibold uppercase tracking-wider text-sky-200 mb-3">
+            Módulo 1 • Biofísica de la Catálisis
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2">
+            Termodinámica de la Catálisis y Coordenadas de Reacción
+          </h2>
+          <p class="text-sky-100 text-sm sm:text-base leading-relaxed">
+            Las enzimas son catalizadores biológicos de naturaleza proteica que incrementan la velocidad de las reacciones en órdenes de <span class="text-amber-300 font-semibold">$10^6$ a $10^{12}$ veces</span> sin alterar el equilibrio químico global ($\Delta G$), disminuyendo drásticamente la barrera de energía libre de activación ($E_a$).
+          </p>
+        </div>
+      </div>
+
+      <!-- Grid: Interactive Reaction Coordinate & Thermodynamic Rules -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Columna Izquierda: Perfil Energético Canvas Interactivo (7 cols) -->
+        <div class="lg:col-span-7 bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+              <div>
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-sky-600"></span>
+                  Perfil Energético de Coordenadas de Reacción
+                </h3>
+                <p class="text-xs text-slate-500">Energía Libre de Gibbs ($G$) en función del avance de la reacción</p>
+              </div>
+              <div class="flex items-center space-x-2 text-xs">
+                <span class="inline-flex items-center gap-1.5 text-slate-600">
+                  <span class="w-3 h-1 bg-red-500 rounded"></span> No Catalizada
+                </span>
+                <span class="inline-flex items-center gap-1.5 text-sky-600 font-semibold">
+                  <span class="w-3 h-1 bg-sky-600 rounded"></span> Catalizada ($E$)
+                </span>
+              </div>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="relative bg-slate-50 border border-slate-200 rounded-xl p-2 overflow-hidden">
+              <canvas id="reactionCanvas" class="w-full h-72 sm:h-80 energy-canvas block"></canvas>
+            </div>
+
+            <!-- Controls Slider -->
+            <div class="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <div class="flex justify-between items-center text-xs mb-1 font-semibold text-slate-700">
+                <label for="catalysisSlider" class="flex items-center gap-1">
+                  Grado de Catálisis Enzimática:
+                </label>
+                <span id="catalysisValue" class="text-sky-700 font-mono font-bold">75% de Reducción de $E_a$</span>
+              </div>
+              <input id="catalysisSlider" type="range" min="10" max="90" value="75" 
+                     class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600">
+              <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+                <span>Poca afinidad a $ES^\ddagger$ (10%)</span>
+                <span>Optimización biológica máxima (90%)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Readout -->
+          <div class="grid grid-cols-3 gap-3 mt-4 text-center">
+            <div class="bg-red-50 p-2.5 rounded-xl border border-red-100">
+              <div class="text-[11px] text-red-600 font-bold uppercase">$E_a$ No Catalizada</div>
+              <div id="eaUncatVal" class="text-base sm:text-lg font-extrabold text-red-700 font-mono">85.0 kJ/mol</div>
+            </div>
+            <div class="bg-sky-50 p-2.5 rounded-xl border border-sky-100">
+              <div class="text-[11px] text-sky-600 font-bold uppercase">$E_a$ Catalizada</div>
+              <div id="eaCatVal" class="text-base sm:text-lg font-extrabold text-sky-700 font-mono">21.2 kJ/mol</div>
+            </div>
+            <div class="bg-emerald-50 p-2.5 rounded-xl border border-emerald-100">
+              <div class="text-[11px] text-emerald-700 font-bold uppercase">$\Delta G$ Reacción Neta</div>
+              <div class="text-base sm:text-lg font-extrabold text-emerald-800 font-mono">-28.4 kJ/mol</div>
+              <span class="text-[10px] text-emerald-600 font-semibold block">Invariable</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna Derecha: Leyes de Invarianza Termodinámica (5 cols) -->
+        <div class="lg:col-span-5 space-y-4">
+          
+          <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+            <h3 class="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
+              <span class="p-1.5 rounded-lg bg-sky-100 text-sky-700">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </span>
+              Principio Fundamental de Invarianza
+            </h3>
+
+            <div class="space-y-3 text-xs sm:text-sm text-slate-600">
+              <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-emerald-500">
+                <strong class="text-slate-800 block text-xs">1. ¿Qué NO modifica la enzima?</strong>
+                <ul class="list-disc list-inside mt-1 space-y-1 text-slate-600 text-xs">
+                  <li>$G_{\text{reactivos}}$ ni $G_{\text{productos}}$ (niveles basales).</li>
+                  <li>$\Delta G$ (variación neta de energía libre). Si una reacción es endergónica ($\Delta G > 0$), la enzima <strong>no la hace espontánea</strong> sin acoplamiento a ATP.</li>
+                  <li>$K_{\text{eq}}$ (constante de equilibrio de la reacción).</li>
+                </ul>
+              </div>
+
+              <div class="p-3 bg-slate-50 rounded-xl border-l-4 border-sky-500">
+                <strong class="text-slate-800 block text-xs">2. ¿Qué SÍ modifica la enzima?</strong>
+                <p class="text-xs text-slate-600 mt-1">
+                  Estabiliza el <strong>estado de transición</strong> ($[\text{ES}]^\ddagger$), rebajando la barrera energética $E_a$. Multiplica la velocidad en ambos sentidos hacia el equilibrio y <strong>se recupera intacta</strong> al finalizar el ciclo catalítico.
+                </p>
+              </div>
+
+              <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 text-xs">
+                <span class="font-bold">⚠️ Perla para el Ingreso UCCuyo:</span> "Las enzimas aceleran la tasa con la que se alcanza el equilibrio químico, pero jamás desplazan la posición de dicho equilibrio".
+              </div>
+            </div>
+          </div>
+
+          <!-- Formula box -->
+          <div class="bg-slate-900 rounded-2xl p-4 text-white shadow-sm">
+            <span class="text-xs font-mono text-sky-400 uppercase tracking-wider block mb-1">Ecuación de Arrhenius</span>
+            <div class="latex-eq text-center text-white py-1">
+              $$k = A \cdot e^{-\frac{E_a}{R \cdot T}}$$
+            </div>
+            <p class="text-[11px] text-slate-300 mt-2 text-center">
+              Al disminuir $E_a$ en el exponente negativo, la constante de velocidad ($k$) aumenta de forma exponencial.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección Cofactores & Holoenzimas -->
+      <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+        <div class="flex items-center space-x-3 mb-6">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">Estructura Molecular: Apoenzimas, Cofactores y Holoenzimas</h3>
+            <p class="text-xs text-slate-500">Componentes requeridos para la competencia catalítica completa</p>
+          </div>
+        </div>
+
+        <!-- Ecuación de ensamblaje -->
+        <div class="bg-slate-50 rounded-xl p-4 mb-6 border border-slate-200 text-center">
+          <div class="latex-eq text-sky-900 font-semibold text-lg">
+            $$\text{Apoenzima (Inactiva)} + \text{Cofactor / Coenzima} \rightleftharpoons \text{Holoenzima (Activa)}$$
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          
+          <!-- Card 1: Apoenzima -->
+          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 hover:border-slate-300 transition-all">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-slate-700 uppercase">Fracción Proteica</span>
+              <span class="text-[10px] bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-mono">Termolábil</span>
+            </div>
+            <h4 class="font-bold text-slate-900 text-base mb-1">Apoenzima</h4>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Es la cadena polipeptídica pura. Por sí sola carece del grupo químico necesario para transferir electrones o grupos funcionales. Proporciona el andamiaje tridimensional y la especificidad de unión al sustrato.
+            </p>
+          </div>
+
+          <!-- Card 2: Cofactores Inorgánicos vs Coenzimas -->
+          <div class="p-4 rounded-xl border border-sky-200 bg-sky-50/50 hover:border-sky-300 transition-all">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-sky-700 uppercase">Grupos Accesorios</span>
+              <span class="text-[10px] bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-mono">Termoestable</span>
+            </div>
+            <h4 class="font-bold text-slate-900 text-base mb-1">Cofactores & Coenzimas</h4>
+            <ul class="text-xs text-slate-600 space-y-1.5 mt-2">
+              <li><strong>Iones Metálicos:</strong> $\text{Fe}^{2+}/\text{Fe}^{3+}$, $\text{Mg}^{2+}$, $\text{Zn}^{2+}$, $\text{Cu}^{2+}$. Actúan como electrófilos y estabilizan cargas.</li>
+              <li><strong>Coenzimas:</strong> Moléculas orgánicas complejas derivadas de vitaminas hidrosolubles (transportadores de grupos o electrones).</li>
+              <li><strong>Grupo Prostético:</strong> Cofactor unido covalentemente o con altísima afinidad (ej. grupo hemo en catalasa).</li>
+            </ul>
+          </div>
+
+          <!-- Card 3: Correlación Clínica / Déficits -->
+          <div class="p-4 rounded-xl border border-rose-200 bg-rose-50/40 hover:border-rose-300 transition-all">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-rose-700 uppercase">Clínica Médica</span>
+              <span class="text-[10px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded font-mono">Avitaminosis</span>
+            </div>
+            <h4 class="font-bold text-slate-900 text-base mb-1">Patologías por Déficit de Coenzimas</h4>
+            <ul class="text-xs text-slate-700 space-y-2 mt-2">
+              <li>
+                <strong>Pelagra (Déficit de Vitamina $\text{B}_3$ / Niacina):</strong> 
+                Disminución de $\text{NAD}^+$ y $\text{NADP}^+$. Cursa con la regla de las 3D: <em>Dermatitis, Diarrea y Demencia</em>.
+              </li>
+              <li>
+                <strong>Beriberi (Déficit de Vitamina $\text{B}_1$ / Tiamina):</strong> 
+                Déficit de TPP (tiamina pirofosfato), bloquea la piruvato deshidrogenasa, generando acidosis láctica e insuficiencia cardíaca/neuropatía.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 2: CLASIFICACIÓN IUBMB ================= -->
+    <section id="tab-nomenclatura" class="tab-content hidden space-y-8">
+      
+      <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+        <div class="max-w-3xl">
+          <span class="text-xs font-bold text-sky-700 uppercase tracking-wider bg-sky-100 px-2.5 py-1 rounded-md">
+            Módulo 2 • Taxonomía Bioquímica Internacional
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">
+            Nomenclatura Sistemática y las 6 Clases Enzimáticas (IUBMB)
+          </h2>
+          <p class="text-slate-600 text-sm mt-2">
+            La Unión Internacional de Bioquímica y Biología Molecular (IUBMB) instauró un sistema donde cada enzima se designa por el sufijo <strong>-asa</strong> unido a la naturaleza del sustrato o tipo de transformación, asignando un código numérico de 4 dígitos (EC x.x.x.x).
+          </p>
+        </div>
+
+        <!-- Selector Interactivo de las 6 Clases -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 mt-6" id="enzymeFamilyButtons">
+          <button onclick="showEnzymeClass(1)" class="iubmb-btn p-3 rounded-xl border border-sky-600 bg-sky-50 text-sky-900 font-bold text-xs text-center transition-all shadow-sm">
+            1. Oxidorreductasas
+          </button>
+          <button onclick="showEnzymeClass(2)" class="iubmb-btn p-3 rounded-xl border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold text-xs text-center transition-all">
+            2. Transferasas
+          </button>
+          <button onclick="showEnzymeClass(3)" class="iubmb-btn p-3 rounded-xl border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold text-xs text-center transition-all">
+            3. Hidrolasas
+          </button>
+          <button onclick="showEnzymeClass(4)" class="iubmb-btn p-3 rounded-xl border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold text-xs text-center transition-all">
+            4. Liasas
+          </button>
+          <button onclick="showEnzymeClass(5)" class="iubmb-btn p-3 rounded-xl border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold text-xs text-center transition-all">
+            5. Isomerasas
+          </button>
+          <button onclick="showEnzymeClass(6)" class="iubmb-btn p-3 rounded-xl border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold text-xs text-center transition-all">
+            6. Ligasas
+          </button>
+        </div>
+
+        <!-- Dynamic Container for Active Class Details -->
+        <div id="enzymeDetailCard" class="mt-6 bg-slate-50 border border-slate-200 rounded-2xl p-6 transition-all">
+          <!-- Injected via JavaScript -->
+        </div>
+
+        <!-- Historical vs Systematic comparison table -->
+        <div class="mt-8 border-t border-slate-200 pt-6">
+          <h4 class="text-base font-bold text-slate-900 mb-3">Evolución de la Nomenclatura Médica</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                  <th class="p-3 font-bold">Tipo de Nomenclatura</th>
+                  <th class="p-3 font-bold">Ejemplos Históricos / Actuales</th>
+                  <th class="p-3 font-bold">Criterio Operativo</th>
+                  <th class="p-3 font-bold">Limitación o Ventaja</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 text-slate-600">
+                <tr>
+                  <td class="p-3 font-semibold text-slate-800">Arbitraria / Tradicional</td>
+                  <td class="p-3 font-mono text-slate-700">Pepsina, Tripsina, Ptialina</td>
+                  <td class="p-3">Derivadas del origen o propiedades organolépticas (<em>pepsis</em> = digestión).</td>
+                  <td class="p-3 text-rose-600 font-medium">No indica sustrato ni mecanismo de enlace.</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold text-slate-800">Sustrato + "-asa"</td>
+                  <td class="p-3 font-mono text-slate-700">Lactasa, Ureasa, Amilasa</td>
+                  <td class="p-3">Se toma el sustrato específico sobre el cual actúa la hidrólisis.</td>
+                  <td class="p-3 text-sky-700 font-medium">Fácil uso clínico habitual.</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold text-slate-800">Sistemática Oficial (IUBMB)</td>
+                  <td class="p-3 font-mono text-slate-700">ATP:D-Hexosa 6-fosfotransferasa (EC 2.7.1.1)</td>
+                  <td class="p-3">Indica sustrato donante, aceptor y clase precisa de transferencia.</td>
+                  <td class="p-3 text-emerald-700 font-medium">Unívoca y universal para bioinformática y farmacología.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= TAB 3: SITIO ACTIVO & MODELOS ================= -->
+    <section id="tab-sitio" class="tab-content hidden space-y-8">
+      
+      <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+        <span class="text-xs font-bold text-sky-700 uppercase tracking-wider bg-sky-100 px-2.5 py-1 rounded-md">
+          Módulo 3 • Biofísica Molecular
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">
+          Anatomía del Sitio Activo y Dinámica de Interacción
+        </h2>
+        
+        <!-- Fundamental equation -->
+        <div class="my-6 bg-gradient-to-r from-sky-50 to-emerald-50 border border-sky-100 rounded-2xl p-5 text-center">
+          <p class="text-xs uppercase font-bold text-slate-500 mb-1 tracking-wider">Ecuación Fundamental del Ciclo Catalítico</p>
+          <div class="latex-eq text-sky-950 font-bold text-xl">
+            $$\text{E} + \text{S} \xrightleftharpoons[k_{-1}]{k_1} [\text{ES}] \xrightarrow{k_2} [\text{EP}] \rightleftharpoons \text{E} + \text{P}$$
+          </div>
+          <p class="text-xs text-slate-600 mt-2 max-w-2xl mx-auto">
+            La enzima ($\text{E}$) reconoce al sustrato ($\text{S}$), induce tensión estereoquímica formando el complejo enzima-sustrato ($[\text{ES}]$), genera el complejo enzima-producto ($[\text{EP}]$) y libera el producto ($\text{P}$), regenerándose intacta.
+          </p>
+        </div>
+
+        <!-- Comparative Interactive: Fischer vs Koshland -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+          
+          <!-- Modelo Llave-Cerradura -->
+          <div class="border border-slate-200 rounded-2xl p-5 bg-slate-50/70 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-xs font-bold uppercase text-slate-500">Modelo Clásico (1894)</span>
+                <span class="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-semibold">Emil Fischer</span>
+              </div>
+              <h3 class="text-lg font-bold text-slate-900">Llave - Cerradura (Complementariedad Rígida)</h3>
+              <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                Postula que el sitio activo de la enzima posee una geometría tridimensional complementaria y preexistente al sustrato, como una llave que encaja exactamente en una cerradura sin deformación.
+              </p>
+              
+              <!-- SVG Visualizer Fischer -->
+              <div class="my-5 bg-white rounded-xl p-4 border border-slate-200 flex flex-col items-center justify-center min-h-[170px]">
+                <svg viewBox="0 0 320 120" class="w-full max-w-xs h-auto">
+                  <!-- Enzyme Body -->
+                  <path d="M 30,20 L 110,20 L 110,60 L 150,60 L 150,20 L 230,20 L 230,100 L 30,100 Z" fill="#0284c7" stroke="#0369a1" stroke-width="2"/>
+                  <text x="50" y="85" fill="#ffffff" font-size="12" font-weight="bold">Enzima (Rígida)</text>
+                  <!-- Cavity is a square 40x40 at x=110 to 150, y=20 to 60 -->
+                  
+                  <!-- Substrate with exact square peg -->
+                  <g id="fischerSubstrate" class="transition-all duration-500">
+                    <rect x="250" y="30" width="36" height="36" fill="#10b981" rx="2" stroke="#059669" stroke-width="2"/>
+                    <text x="254" y="52" fill="#ffffff" font-size="10" font-weight="bold">Sustrato</text>
+                  </g>
+                </svg>
+                <div class="mt-2 flex gap-2">
+                  <button onclick="toggleFischerFit()" id="btnFischer" class="text-xs font-bold bg-sky-600 hover:bg-sky-700 text-white px-3 py-1.5 rounded-lg shadow-sm">
+                    Simular Acoplamiento
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-[11px] text-slate-500 bg-white p-2.5 rounded-xl border border-slate-200">
+              <strong class="text-slate-700">Limitación biofísica:</strong> Si la enzima se adaptara perfectamente al sustrato basal y no al <em>estado de transición</em>, el complejo $[\text{ES}]$ caería en un pozo de potencial energético demasiado estable, frenando la catálisis.
+            </div>
+          </div>
+
+          <!-- Modelo Ajuste Inducido -->
+          <div class="border border-sky-200 rounded-2xl p-5 bg-sky-50/40 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-xs font-bold uppercase text-sky-700">Modelo Moderno Dinámico (1958)</span>
+                <span class="text-xs bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-semibold">Daniel Koshland</span>
+              </div>
+              <h3 class="text-lg font-bold text-slate-900">Ajuste Inducido (Complementariedad Flexible)</h3>
+              <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                El sitio activo es plástico y moldeable. La unión inicial del sustrato induce un reordenamiento conformacional coordinado que alinea de forma micrométrica los residuos catalíticos y excluye el agua.
+              </p>
+
+              <!-- SVG Visualizer Koshland -->
+              <div class="my-5 bg-white rounded-xl p-4 border border-sky-200 flex flex-col items-center justify-center min-h-[170px]">
+                <svg viewBox="0 0 320 120" class="w-full max-w-xs h-auto">
+                  <!-- Dynamic Flexible Enzyme Jaws -->
+                  <g id="koshlandEnzyme" class="transition-all duration-700">
+                    <!-- Left lobe -->
+                    <path id="koshlandLeftLobe" d="M 40,20 Q 90,30 110,50 L 110,80 Q 70,100 40,90 Z" fill="#0284c7" stroke="#0369a1" stroke-width="2"/>
+                    <!-- Right lobe (closes upon induced fit) -->
+                    <path id="koshlandRightLobe" d="M 220,20 Q 170,30 150,50 L 150,80 Q 190,100 220,90 Z" fill="#0284c7" stroke="#0369a1" stroke-width="2"/>
+                    <!-- Base hinge -->
+                    <rect x="90" y="70" width="80" height="25" fill="#0369a1" rx="4"/>
+                    <text x="96" y="86" fill="#ffffff" font-size="10" font-weight="bold">Dominio Bisagra</text>
+                  </g>
+
+                  <!-- Substrate (Glucose) -->
+                  <g id="koshlandSubstrate" class="transition-all duration-700 transform translate-x-0">
+                    <circle cx="130" cy="30" r="16" fill="#10b981" stroke="#059669" stroke-width="2"/>
+                    <text x="123" y="34" fill="#ffffff" font-size="10" font-weight="bold">Glc</text>
+                  </g>
+                </svg>
+                <div class="mt-2 flex gap-2">
+                  <button onclick="toggleInducedFit()" id="btnKoshland" class="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg shadow-sm">
+                    Inducir Cambio Conformacional
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Clinical Example: Hexokinase -->
+            <div class="text-[11px] text-slate-700 bg-white p-2.5 rounded-xl border border-sky-200">
+              <strong class="text-sky-900 block font-semibold mb-0.5">Ejemplo Médico de Cátedra: Hexoquinasa Humana</strong>
+              Al ingresar la D-Glucosa, los dos lóbulos de la hexoquinasa se aproximan $8\,\text{Å}$, cerrándose como una almeja. Esto excluye al $\text{H}_2\text{O}$ del solvente para evitar que el ATP se hidrolice espontáneamente en lugar de fosforilar al azúcar.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Fuerzas Químicas en el Bolsillo Tridimensional -->
+        <div class="mt-8 bg-slate-50 rounded-2xl p-5 border border-slate-200">
+          <h4 class="font-bold text-slate-900 text-sm mb-3">Fuerzas Estabilizadoras del Complejo Enzima-Sustrato</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-slate-600">
+            <div class="bg-white p-3 rounded-xl border border-slate-200">
+              <span class="font-bold text-slate-800 block text-xs mb-1">1. Enlaces No Covalentes Débiles</span>
+              Puentes de hidrógeno múltiples, atracciones electrostáticas (puentes salinos entre $\text{Lys}^+/\text{Arg}^+$ y $\text{Asp}^-/\text{Glu}^-$) e interacciones hidrofóbicas que aportan la <em>energía de fijación</em> ($\Delta G_B$).
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-slate-200">
+              <span class="font-bold text-slate-800 block text-xs mb-1">2. Catálisis Ácido-Base General</span>
+              Cadenas laterales de aminoácidos actúan como donantes o aceptores de protones ($\text{H}^+$). El anillo imidazólico de la <strong>Histidina</strong> es prototípico por poseer un $\text{p}K_a \approx 6.0$, oscilando protonado/desprotonado a $\text{pH}$ fisiológico.
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-slate-200">
+              <span class="font-bold text-slate-800 block text-xs mb-1">3. Tensión y Distorsión de Enlaces</span>
+              La unión fuerza al sustrato a adoptar una geometría forzada idéntica a la del estado de transición inestable, debilitando el enlace químico diana antes de la ruptura.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= TAB 4: MICHAELIS-MENTEN & FACTORES ================= -->
+    <section id="tab-cinetica" class="tab-content hidden space-y-8">
+      
+      <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+        <span class="text-xs font-bold text-sky-700 uppercase tracking-wider bg-sky-100 px-2.5 py-1 rounded-md">
+          Módulo 4 • Cinética Enzimática Cuantitativa
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">
+          Cinética de Michaelis-Menten y Microambiente Fisicoquímico
+        </h2>
+
+        <!-- Mathematical definition header -->
+        <div class="mt-4 p-4 bg-slate-900 text-white rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4">
+          <div>
+            <div class="text-xs text-sky-400 font-mono font-semibold">ECUACIÓN FUNDAMENTAL DE VELOCIDAD INICIAL</div>
+            <div class="latex-eq text-lg sm:text-2xl text-white font-bold py-1">
+              $$V_0 = \frac{\text{V}_{\text{max}} \cdot [\text{S}]}{K_m + [\text{S}]}$$
+            </div>
+          </div>
+          <div class="text-xs text-slate-300 max-w-sm border-l border-slate-700 pl-4">
+            <strong class="text-white">Constante de Michaelis ($K_m$):</strong> Concentración de sustrato requerida para alcanzar la mitad de la velocidad máxima ($V_0 = \frac{\text{V}_{\text{max}}}{2}$). Cuanto <strong>menor</strong> es la $K_m$, <strong>mayor</strong> es la afinidad de la enzima por su sustrato.
+          </div>
+        </div>
+
+        <!-- Interactive Michaelis-Menten Graph & Sliders -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-8">
+          
+          <!-- Chart Container (8 cols) -->
+          <div class="lg:col-span-8 bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-crimson"></span>
+                  Curva Hiperbólica de Saturación ($V_0$ vs $[\text{S}]$)
+                </h3>
+                <span class="text-[11px] font-mono text-slate-500">Estado Estacionario de Briggs-Haldane</span>
+              </div>
+              <div class="relative w-full h-72 sm:h-80">
+                <canvas id="michaelisChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Regimes explanation tags -->
+            <div class="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-slate-200 text-xs">
+              <div class="p-2.5 bg-white rounded-xl border border-slate-200">
+                <span class="font-bold text-sky-700 block text-xs">A bajas $[\text{S}] \ll K_m$ (Primer Orden)</span>
+                La velocidad es directamente proporcional a la concentración de sustrato: $V_0 \approx \left(\frac{\text{V}_{\text{max}}}{K_m}\right) [\text{S}]$. Sitios activos mayormente vacíos.
+              </div>
+              <div class="p-2.5 bg-white rounded-xl border border-slate-200">
+                <span class="font-bold text-emerald-700 block text-xs">A altas $[\text{S}] \gg K_m$ (Orden Cero)</span>
+                Saturación total de la enzima ($[\text{ES}] \approx [\text{E}]_{\text{total}}$). La velocidad se independiza de $[\text{S}]$ y tiende asintóticamente a $\text{V}_{\text{max}}$.
+              </div>
+            </div>
+          </div>
+
+          <!-- Parameter Controllers (4 cols) -->
+          <div class="lg:col-span-4 space-y-4">
+            
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-4">
+              <h4 class="font-bold text-slate-900 text-sm border-b border-slate-100 pb-2">Variables Cinéticas</h4>
+              
+              <!-- Slider Vmax -->
+              <div>
+                <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                  <span>Velocidad Máxima ($\text{V}_{\text{max}}$):</span>
+                  <span id="vmaxDisplay" class="font-mono text-crimson font-bold">100 μmol/min</span>
+                </div>
+                <input id="vmaxSlider" type="range" min="30" max="200" value="100" 
+                       class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-rose-600">
+                <p class="text-[10px] text-slate-400 mt-0.5">Depende directamente de la concentración total de enzima $[\text{E}]_t$.</p>
+              </div>
+
+              <!-- Slider Km -->
+              <div>
+                <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                  <span>Constante de Afinidad ($K_m$):</span>
+                  <span id="kmDisplay" class="font-mono text-sky-700 font-bold">15 mM</span>
+                </div>
+                <input id="kmSlider" type="range" min="5" max="50" value="15" 
+                       class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-600">
+                <p class="text-[10px] text-slate-400 mt-0.5">Menor valor = Mayor avidez de unión por el ligando.</p>
+              </div>
+
+              <!-- Live Substrate Evaluator -->
+              <div class="p-3 bg-sky-50 rounded-xl border border-sky-100">
+                <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                  <span>Punto de Sustrato Actual $[\text{S}]$:</span>
+                  <span id="sValDisplay" class="font-mono text-emerald-700 font-bold">15 mM</span>
+                </div>
+                <input id="sSlider" type="range" min="1" max="100" value="15" 
+                       class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+                <div class="mt-2.5 pt-2 border-t border-sky-200/60 flex justify-between items-center text-xs">
+                  <span class="font-bold text-slate-700">Velocidad $V_0$:</span>
+                  <span id="calculatedV0" class="font-mono font-extrabold text-sm text-sky-900">50.00 μmol/min</span>
+                </div>
+                <div id="v0PercentageBadge" class="text-[11px] text-sky-700 mt-1 font-semibold text-center">
+                  (50% de la $\text{V}_{\text{max}}$ teórica)
+                </div>
+              </div>
+
+              <button onclick="resetMichaelisDefaults()" class="w-full py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition-all">
+                Restablecer Valores Fisiológicos
+              </button>
+            </div>
+
+            <!-- Clinical comparison box -->
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs text-amber-900">
+              <span class="font-bold block mb-1 text-amber-950">Ejemplo de Examen: Hexoquinasa vs Glucoquinasa</span>
+              <p class="leading-relaxed">
+                • <strong>Hexoquinasa (cerebro/músculo):</strong> $K_m \approx 0.1\,\text{mM}$. Siempre saturada a glucemia basal ($5\,\text{mM}$) para garantizar suministro neuronal constante.<br>
+                • <strong>Glucoquinasa (hígado):</strong> $K_m \approx 10\,\text{mM}$. Solo activa tras ingesta rica en carbohidratos, regulando la glucemia postprandial sin saturarse precozmente.
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Microambiente Fisicoquímico: Temperatura y pH -->
+        <div class="mt-12 pt-8 border-t border-slate-200">
+          <div class="max-w-2xl mb-6">
+            <h3 class="text-xl font-bold text-slate-900">Efecto del Microambiente: Temperatura y pH</h3>
+            <p class="text-xs text-slate-500">
+              Las enzimas son proteínas globulares cuya estructura terciaria y estado de ionización de los grupos R dependen críticamente de las variables fisicoquímicas del medio.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Curva de Temperatura -->
+            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+              <div class="flex justify-between items-center mb-3">
+                <h4 class="font-bold text-slate-900 text-sm">Cinética Térmica y Desnaturalización</h4>
+                <span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-mono font-bold">Óptimo: 37°C</span>
+              </div>
+              <div class="relative w-full h-56">
+                <canvas id="tempChart"></canvas>
+              </div>
+              <div class="mt-4 text-xs text-slate-600 space-y-2">
+                <p>
+                  <strong>Fase ascendente ($< 37^\circ\text{C}$):</strong> La energía cinética aumenta los choques eficaces entre enzima y sustrato ($Q_{10} \approx 2$).
+                </p>
+                <p class="text-rose-700 font-medium">
+                  <strong>Colapso térmico ($> 40^\circ\text{C}$):</strong> La agitación térmica desorganiza los puentes de hidrógeno y enlaces hidrofóbicos que sostienen la conformación terciaria, conduciendo a una <strong>desnaturalización irreversible</strong>.
+                </p>
+                <div class="bg-white p-2.5 rounded-xl border border-rose-200 text-[11px] text-slate-700">
+                  <strong>Correlación Médica:</strong> El síndrome febril extremo (hiperpirexia $> 41^\circ\text{C}$) o golpe de calor provoca disfunción multiorgánica por inactivación enzimática sistémica masiva.
+                </div>
+              </div>
+            </div>
+
+            <!-- Curva de pH -->
+            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+              <div class="flex justify-between items-center mb-3">
+                <h4 class="font-bold text-slate-900 text-sm">Campana de pH y Grado de Ionización</h4>
+                <span class="text-xs bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-mono font-bold">Compartimento-Específico</span>
+              </div>
+              <div class="relative w-full h-56">
+                <canvas id="phChart"></canvas>
+              </div>
+              <div class="mt-4 text-xs text-slate-600 space-y-2">
+                <p>
+                  Cada enzima presenta un <strong>$\text{pH}$ óptimo</strong> adaptado a su nicho biológico anatómico:
+                </p>
+                <ul class="list-disc list-inside space-y-1 text-slate-700">
+                  <li><strong>Pepsina gástrica:</strong> $\text{pH} \approx 1.5 - 2.0$ (estómago ácido).</li>
+                  <li><strong>Amilasa salival:</strong> $\text{pH} \approx 6.8$ (cavidad oral neutra).</li>
+                  <li><strong>Tripsina pancreática:</strong> $\text{pH} \approx 7.8 - 8.2$ (duodeno alcalinizado por $\text{HCO}_3^-$).</li>
+                </ul>
+                <div class="bg-white p-2.5 rounded-xl border border-sky-200 text-[11px] text-slate-700">
+                  <strong>Correlación Médica:</strong> En la <em>Cetoacidosis Diabética</em> ($\text{pH}$ plasmático $< 7.10$), la alteración en la ionización de las cadenas catalíticas deprime el metabolismo celular y la contractilidad cardíaca.
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= TAB 5: INHIBICIÓN & ALOSTERISMO ================= -->
+    <section id="tab-inhibicion" class="tab-content hidden space-y-8">
+      
+      <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+        <span class="text-xs font-bold text-sky-700 uppercase tracking-wider bg-sky-100 px-2.5 py-1 rounded-md">
+          Módulo 5 • Farmacología & Regulación Celular
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">
+          Inhibición Enzimática y Modulación Alostérica
+        </h2>
+        <p class="text-slate-600 text-sm mt-1">
+          La modulación de la actividad catalítica mediante inhibidores farmacológicos o metabolitos de retroalimentación constituye el pilar de la farmacoterapéutica moderna y la homeostasis energética.
+        </p>
+
+        <!-- Simulador Comparativo de Inhibición Reversible -->
+        <div class="mt-8 bg-slate-50 border border-slate-200 rounded-2xl p-6">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">Laboratorio de Inhibición Reversible</h3>
+              <p class="text-xs text-slate-500">Compara el comportamiento cinético de la enzima testigo frente al inhibidor</p>
+            </div>
+            
+            <!-- Type Selector Buttons -->
+            <div class="flex rounded-xl bg-slate-200 p-1 text-xs font-bold">
+              <button onclick="setInhibitionMode('competitive')" id="btnInhibComp" class="px-3.5 py-1.5 rounded-lg bg-white text-sky-800 shadow-sm transition-all">
+                Competitiva
+              </button>
+              <button onclick="setInhibitionMode('noncompetitive')" id="btnInhibNonComp" class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all">
+                No Competitiva
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <!-- Curve Graphic (7 cols) -->
+            <div class="lg:col-span-7 bg-white p-4 rounded-xl border border-slate-200">
+              <div class="h-64 sm:h-72 w-full">
+                <canvas id="inhibChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Parameters and Theoretical Table (5 cols) -->
+            <div class="lg:col-span-5 space-y-3 text-xs">
+              
+              <div id="inhibExplanationBox" class="p-4 rounded-xl border transition-all">
+                <!-- Injected via JS according to mode -->
+              </div>
+
+              <!-- Comparative Table -->
+              <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <table class="w-full text-left text-xs">
+                  <thead class="bg-slate-100 font-bold text-slate-700">
+                    <tr>
+                      <th class="p-2.5">Parámetro</th>
+                      <th class="p-2.5 text-sky-700">Inhib. Competitiva</th>
+                      <th class="p-2.5 text-rose-700">Inhib. No Competitiva</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100 text-slate-600">
+                    <tr>
+                      <td class="p-2.5 font-bold text-slate-800">Sitio de Unión</td>
+                      <td class="p-2.5">Sitio Activo Ortostérico</td>
+                      <td class="p-2.5">Sitio Alostérico Regulador</td>
+                    </tr>
+                    <tr>
+                      <td class="p-2.5 font-bold text-slate-800">$K_m$ Aparente</td>
+                      <td class="p-2.5 text-amber-700 font-bold">Aumenta ($\uparrow$) (menor afinidad)</td>
+                      <td class="p-2.5 text-emerald-700 font-bold">Invariable ($=$)</td>
+                    </tr>
+                    <tr>
+                      <td class="p-2.5 font-bold text-slate-800">$\text{V}_{\text{max}}$ Efectiva</td>
+                      <td class="p-2.5 text-emerald-700 font-bold">Invariable ($=$)</td>
+                      <td class="p-2.5 text-rose-700 font-bold">Disminuye ($\downarrow$)</td>
+                    </tr>
+                    <tr>
+                      <td class="p-2.5 font-bold text-slate-800">¿Se revierte con $[\text{S}]$?</td>
+                      <td class="p-2.5 font-semibold text-emerald-600">SÍ (desplaza por masa)</td>
+                      <td class="p-2.5 font-semibold text-rose-600">NO (inactiva sitios)</td>
+                    </tr>
+                    <tr>
+                      <td class="p-2.5 font-bold text-slate-800">Ejemplo Farmacológico</td>
+                      <td class="p-2.5">Estatinas (Atorvastatina en HMG-CoA reductasa)</td>
+                      <td class="p-2.5">Acetazolamida en anhidrasa carbónica renal</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Inhibición Irreversible & Toxicología Médica -->
+        <div class="mt-8">
+          <h3 class="font-bold text-slate-900 text-lg mb-4 flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-rose-600"></span>
+            Inhibición Irreversible y Toxicología Médica
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            
+            <div class="p-4 bg-rose-50/50 rounded-xl border border-rose-200">
+              <div class="flex items-center space-x-2 text-rose-800 font-bold text-sm mb-1">
+                <svg class="w-4 h-4 text-rose-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+                <span>Intoxicación por Cianuro ($\text{CN}^-$)</span>
+              </div>
+              <p class="text-slate-700 leading-relaxed mt-1">
+                El anión $\text{CN}^-$ se une de forma covalente con extrema afinidad al ion $\text{Fe}^{3+}$ férrico del grupo hemo de la <strong>Citocromo c oxidasa (Complejo IV)</strong> en la cadena de transporte de electrones mitocondrial.
+              </p>
+              <div class="mt-2 bg-white p-2 rounded-lg border border-rose-200 font-medium text-rose-900">
+                Efecto clínico: Paro inmediato de la fosforilación oxidativa, anoxia histotóxica y muerte celular por colapso en la síntesis de $\text{ATP}$.
+              </div>
+            </div>
+
+            <div class="p-4 bg-amber-50/60 rounded-xl border border-amber-200">
+              <div class="flex items-center space-x-2 text-amber-900 font-bold text-sm mb-1">
+                <svg class="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                <span>Metales Pesados: Plomo ($\text{Pb}^{2+}$) y Mercurio ($\text{Hg}^{2+}$)</span>
+              </div>
+              <p class="text-slate-700 leading-relaxed mt-1">
+                Reaccionan con los grupos sulfhidrilo o tiol ($-\text{SH}$) de residuos de cisteína esenciales en enzimas clave, formando mercapturos insolubles y desestructurando la conformación terciaria.
+              </p>
+              <div class="mt-2 bg-white p-2 rounded-lg border border-amber-200 font-medium text-amber-900">
+                Efecto clínico: El plomo inhibe la $\delta$-aminolevulinato deshidratasa y la ferroquelatasa, precipitando anemia microcítica (saturnismo).
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Regulación Alostérica y Retroalimentación Negativa (Feedback) -->
+        <div class="mt-8 border-t border-slate-200 pt-6">
+          <h3 class="font-bold text-slate-900 text-lg mb-2">
+            Regulación Metabólica: Retroalimentación Negativa (Feedback Inhibition)
+          </h3>
+          <p class="text-xs text-slate-600 mb-6 max-w-3xl">
+            Las enzimas marcapasos (usualmente $\text{E}_1$) son oligómeros alostéricos que oscilan entre dos estados: el <strong>estado T (tenso, baja afinidad)</strong> y el <strong>estado R (relajado, alta actividad)</strong>. Experimenta con el flujo metabólico de la vía:
+          </p>
+
+          <!-- Interactive Pathway Simulation -->
+          <div class="bg-slate-900 rounded-2xl p-6 text-white">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+              <div>
+                <span class="text-xs font-mono text-sky-400 uppercase tracking-widest">Simulación Dinámica de Vía Multienzimática</span>
+                <h4 class="text-lg font-bold text-white mt-1">Vía Biosintética: $\text{W} \to \text{X} \to \text{Y} \to \text{Z}$</h4>
+              </div>
+              
+              <div class="flex items-center space-x-3 bg-slate-800 px-4 py-2 rounded-xl border border-slate-700">
+                <label for="productZLevel" class="text-xs font-semibold text-slate-300">Nivel de Producto $\text{Z}$:</label>
+                <input id="productZLevel" type="range" min="0" max="100" value="20" oninput="updateAllostericSimulation()"
+                       class="w-28 sm:w-36 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-400">
+                <span id="productZLabel" class="text-xs font-mono font-bold text-amber-400 w-12 text-right">20%</span>
+              </div>
+            </div>
+
+            <!-- Pathway Nodes Canvas / Graphic -->
+            <div class="relative py-4 px-2">
+              <div class="flex flex-wrap items-center justify-around gap-2 text-center">
+                
+                <!-- Sustrato Inicial W -->
+                <div class="flex flex-col items-center">
+                  <div class="w-14 h-14 rounded-2xl bg-sky-500/20 border-2 border-sky-400 flex items-center justify-center font-bold text-lg text-sky-200">
+                    $\text{W}$
+                  </div>
+                  <span class="text-[11px] text-slate-400 mt-1 font-mono">Sustrato Basal</span>
+                </div>
+
+                <!-- Enzyme E1 (Allosteric Pacemaker) -->
+                <div class="flex flex-col items-center relative">
+                  <div id="e1Indicator" class="px-3 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-bold text-xs shadow-lg transition-all">
+                    Enzima $\text{E}_1$ (Marcapasos)
+                  </div>
+                  <span id="e1StateText" class="text-[10px] text-emerald-400 font-mono mt-1">Estado R (Activa)</span>
+                  <div class="text-slate-500 text-xs">➔</div>
+                </div>
+
+                <!-- Intermediario X -->
+                <div class="flex flex-col items-center">
+                  <div class="w-12 h-12 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-base text-slate-300">
+                    $\text{X}$
+                  </div>
+                  <span class="text-[10px] text-slate-400 mt-1 font-mono">Intermediario</span>
+                </div>
+
+                <!-- Enzyme E2 -->
+                <div class="flex flex-col items-center">
+                  <div class="px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 font-mono text-xs border border-slate-700">
+                    $\text{E}_2$
+                  </div>
+                  <div class="text-slate-500 text-xs mt-1">➔</div>
+                </div>
+
+                <!-- Intermediario Y -->
+                <div class="flex flex-col items-center">
+                  <div class="w-12 h-12 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-base text-slate-300">
+                    $\text{Y}$
+                  </div>
+                  <span class="text-[10px] text-slate-400 mt-1 font-mono">Intermediario</span>
+                </div>
+
+                <!-- Enzyme E3 -->
+                <div class="flex flex-col items-center">
+                  <div class="px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 font-mono text-xs border border-slate-700">
+                    $\text{E}_3$
+                  </div>
+                  <div class="text-slate-500 text-xs mt-1">➔</div>
+                </div>
+
+                <!-- Producto Final Z -->
+                <div class="flex flex-col items-center relative">
+                  <div id="productZNode" class="w-14 h-14 rounded-2xl bg-amber-500/30 border-2 border-amber-400 flex items-center justify-center font-extrabold text-xl text-amber-300 shadow-md">
+                    $\text{Z}$
+                  </div>
+                  <span class="text-[11px] text-amber-300 mt-1 font-mono font-bold">Producto Final</span>
+                </div>
+
+              </div>
+
+              <!-- Feedback Arrow description -->
+              <div id="feedbackArrowBox" class="mt-6 p-3 rounded-xl bg-slate-800/80 border border-slate-700 text-xs text-slate-300 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400" id="feedbackDot"></span>
+                  <span id="feedbackStatusDesc">Flujo libre continuo: El producto $\text{Z}$ se consume rápidamente por la célula. La enzima $\text{E}_1$ opera en conformación relajada ($\text{R}$).</span>
+                </div>
+                <span class="text-amber-400 font-mono font-bold text-[11px]" id="fluxRateLabel">Flujo Vía: 85%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= TAB 6: APLICACIONES CLÍNICAS & IAM ================= -->
+    <section id="tab-clinica" class="tab-content hidden space-y-8">
+      
+      <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+        <span class="text-xs font-bold text-sky-700 uppercase tracking-wider bg-sky-100 px-2.5 py-1 rounded-md">
+          Módulo 6 • Medicina Traslacional & Diagnóstica
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">
+          Enzimología Clínica: Diagnóstico y Terapéutica Médica
+        </h2>
+        <p class="text-slate-600 text-sm mt-1">
+          La aparición o incremento sustancial de enzimas intracelulares en el compartimento intravascular refleja daño tisular por necrosis o alteración de la permeabilidad de membrana.
+        </p>
+
+        <!-- Sección 1: IAM y Cinética de Liberación Enzimática -->
+        <div class="mt-8 bg-slate-50 border border-slate-200 rounded-2xl p-6">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4">
+            <div>
+              <h3 class="font-bold text-slate-900 text-lg flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-rose-600"></span>
+                Cinética de Biomarcadores en el Infarto Agudo de Miocardio (IAM)
+              </h3>
+              <p class="text-xs text-slate-500">Cronología sérica de elevación tras la isquemia miocárdica transmural</p>
+            </div>
+            <div class="text-xs bg-white px-3 py-1.5 rounded-lg border border-slate-200 font-semibold text-slate-600">
+              Ventana de Análisis: 0 a 168 horas (7 días)
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <div class="lg:col-span-8 bg-white p-4 rounded-xl border border-slate-200">
+              <div class="h-72 sm:h-80 w-full">
+                <canvas id="iamChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Biomarker details -->
+            <div class="lg:col-span-4 space-y-3 text-xs">
+              
+              <!-- CK-MB -->
+              <div class="p-3 bg-white rounded-xl border-l-4 border-rose-500 shadow-sm">
+                <div class="flex justify-between items-center">
+                  <strong class="text-slate-900 text-xs font-bold">1. Creatina Quinasa ($\text{CK/CK-MB}$)</strong>
+                  <span class="text-[10px] bg-rose-100 text-rose-800 font-mono px-1.5 py-0.5 rounded">Rápida</span>
+                </div>
+                <p class="text-slate-600 mt-1">
+                  Se eleva a las <strong>4 a 6 horas</strong>, alcanza su pico entre las <strong>18 y 24 horas</strong> y se normaliza a las 48-72 h. Ideal para diagnosticar <em>reinfarto precoz</em>.
+                </p>
+              </div>
+
+              <!-- GOT / AST -->
+              <div class="p-3 bg-white rounded-xl border-l-4 border-amber-500 shadow-sm">
+                <div class="flex justify-between items-center">
+                  <strong class="text-slate-900 text-xs font-bold">2. Transaminasa ($\text{GOT/AST}$)</strong>
+                  <span class="text-[10px] bg-amber-100 text-amber-800 font-mono px-1.5 py-0.5 rounded">Intermedia</span>
+                </div>
+                <p class="text-slate-600 mt-1">
+                  Comienza a elevarse a las <strong>8 a 12 horas</strong>, pico a las <strong>24-48 horas</strong>, retornando al rango basal a los 4-5 días.
+                </p>
+              </div>
+
+              <!-- LDH -->
+              <div class="p-3 bg-white rounded-xl border-l-4 border-sky-500 shadow-sm">
+                <div class="flex justify-between items-center">
+                  <strong class="text-slate-900 text-xs font-bold">3. Lactato Deshidrogenasa ($\text{LDH}$)</strong>
+                  <span class="text-[10px] bg-sky-100 text-sky-800 font-mono px-1.5 py-0.5 rounded">Tardía</span>
+                </div>
+                <p class="text-slate-600 mt-1">
+                  Ascenso lento desde las <strong>24 a 48 horas</strong>, pico máximo al <strong>3º a 4º día</strong> y persiste elevada hasta 10 a 14 días. Inversión del cociente $\text{LDH}_1 > \text{LDH}_2$.
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección 2: Biosensores de Glucosa y Enzimoterapia Fibrinolítica -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+          
+          <!-- Biosensor de Glucosa -->
+          <div class="p-5 rounded-2xl border border-emerald-200 bg-emerald-50/40">
+            <div class="flex items-center space-x-2 text-emerald-900 font-bold text-base mb-2">
+              <svg class="w-5 h-5 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+              <span>Biosensores y Tiras Reactivas de Glucemia</span>
+            </div>
+            <p class="text-xs text-slate-700 leading-relaxed">
+              El monitoreo ambulatorio de diabetes se fundamenta en un <strong>sistema bicapa enzimático acoplado</strong> fijado en la almohadilla reactiva:
+            </p>
+
+            <div class="bg-white p-3 rounded-xl border border-emerald-200 my-3 text-xs">
+              <div class="latex-eq text-emerald-950 font-semibold mb-1">
+                $$\text{D-Glucosa} + \text{O}_2 \xrightarrow{\text{Glucosa Oxidasa}} \text{Ác. Glucónico} + \text{H}_2\text{O}_2$$
+              </div>
+              <div class="latex-eq text-emerald-950 font-semibold">
+                $$\text{H}_2\text{O}_2 + \text{Cromógeno Incoloro} \xrightarrow{\text{Peroxidasa}} \text{Pigmento Coloreado} + 2\,\text{H}_2\text{O}$$
+              </div>
+            </div>
+
+            <p class="text-xs text-slate-600">
+              La intensidad cromática o la corriente amperométrica de los electrones liberados es proporcional a la concentración estricta de glucosa plasmática.
+            </p>
+          </div>
+
+          <!-- Enzimoterapia Fibrinolítica -->
+          <div class="p-5 rounded-2xl border border-sky-200 bg-sky-50/40">
+            <div class="flex items-center space-x-2 text-sky-950 font-bold text-base mb-2">
+              <svg class="w-5 h-5 text-sky-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              <span>Enzimoterapia Fibrinolítica de Emergencia</span>
+            </div>
+            <p class="text-xs text-slate-700 leading-relaxed">
+              En emergencias cardiovasculares (IAM con supradesnivel del ST o Accidente Cerebrovascular Isquémico en ventana $< 4.5\,\text{h}$), se infunden activadores enzimáticos exógenos:
+            </p>
+
+            <div class="bg-white p-3 rounded-xl border border-sky-200 my-3 text-xs space-y-1.5">
+              <p>
+                <strong>Estreptoquinasa / Uroquinasa / r-tPA (Alteplasa):</strong>
+                Hidrolizan el enlace peptídico $\text{Arg}^{561}-\text{Val}^{562}$ del <strong>Plasminógeno</strong> endógeno, transformándolo en la serina-proteasa activa <strong>Plasmina</strong>.
+              </p>
+              <div class="latex-eq text-sky-900 font-semibold text-center">
+                $$\text{Plasminógeno} \xrightarrow{\text{Fibrinolítico}} \text{Plasmina} \xrightarrow{\text{Lisis}} \text{Malla de Fibrina disuelta}$$
+              </div>
+            </div>
+
+            <p class="text-xs text-slate-600">
+              Esto disuelve selectivamente el trombo oclusivo, restituyendo el flujo sanguíneo tisular miocárdico y salvando el tejido en penumbra.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    </div>
+  </main>
+
+  <!-- Pie de Página Institucional -->
+  <footer class="bg-white border-t border-gray-200 py-3 text-center text-xs text-gray-500 font-medium">
+    Desarrollado por vesalio - Todos los derechos reservados
+  </footer>
+
+  <!-- Modal: Vademécum Teórico Enzimático y Cinético -->
+  <div id="modal-formulas" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white max-w-3xl w-full rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="bg-accent p-4 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-book-bookmark text-xl"></i>
+          <h3 class="font-bold text-base">Vademécum Teórico: Enzimología y Bioquímica Médica</h3>
+        </div>
+        <button onclick="closeFormulasModal()" class="text-white hover:text-gray-200 transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      
+      <div class="p-6 overflow-y-auto space-y-6 text-xs md:text-sm text-gray-700 custom-scroll leading-relaxed">
+        
+        <!-- 1. Termodinámica y Cinética Enzimática -->
+        <div>
+          <h4 class="font-bold text-accent text-sm mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-bolt"></i> 1. Leyes Termodinámicas y Cinética de Michaelis-Menten
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-200">
+              <span class="font-bold text-slate-800">Ecuación de Michaelis-Menten:</span>
+              <div class="text-center my-1 font-mono text-accent">
+                $$V_0 = \frac{\text{V}_{\text{max}} [\text{S}]}{K_m + [\text{S}]}$$
+              </div>
+              <p class="text-[11px] text-gray-600">Relación hiperbólica entre $[\text{S}]$ y velocidad inicial. $K_m$ es la $[\text{S}]$ a la cual $V_0 = \frac{\text{V}_{\text{max}}}{2}$.</p>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-200">
+              <span class="font-bold text-slate-800">Invarianza Termodinámica ($\Delta G$):</span>
+              <div class="text-center my-1 font-mono text-accent">
+                $$\Delta G^\circ = -R T \ln K_{\text{eq}}$$
+              </div>
+              <p class="text-[11px] text-gray-600">La enzima reduce la barrera de activación ($E_a$), pero no altera $G_{\text{reactivos}}$, $G_{\text{productos}}$, $\Delta G$ ni $K_{\text{eq}}$.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Clasificación Sistemática IUBMB (6 Clases) -->
+        <div>
+          <h4 class="font-bold text-accent text-sm mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-sitemap"></i> 2. Clasificación Internacional de Enzimas (IUBMB)
+          </h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-gray-200 text-gray-500 font-semibold">
+                  <th class="py-1.5">Clase</th>
+                  <th class="py-1.5">Mecanismo Catalítico</th>
+                  <th class="py-1.5">Ejemplo Biomédico</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr>
+                  <td class="py-1 font-semibold text-accent">1. Oxidorreductasas</td>
+                  <td class="py-1">Transferencia de electrones / equivalentes redox ($H$).</td>
+                  <td class="py-1 font-mono">LDH (Lactato Deshidrogenasa)</td>
+                </tr>
+                <tr>
+                  <td class="py-1 font-semibold text-accent">2. Transferasas</td>
+                  <td class="py-1">Transferencia de grupos funcionales (amino, fosfato, metilo).</td>
+                  <td class="py-1 font-mono">Transaminasas (GOT/AST, GPT/ALT)</td>
+                </tr>
+                <tr>
+                  <td class="py-1 font-semibold text-accent">3. Hidrolasas</td>
+                  <td class="py-1">Ruptura de enlaces con adición de $\text{H}_2\text{O}$.</td>
+                  <td class="py-1 font-mono">Amilasa, Lipasa pancreática, Tripsina</td>
+                </tr>
+                <tr>
+                  <td class="py-1 font-semibold text-accent">4. Liasas</td>
+                  <td class="py-1">Escisión o adición a dobles enlaces sin hidrólisis ni redox.</td>
+                  <td class="py-1 font-mono">Anhidrasa Carbónica, Descarboxilasas</td>
+                </tr>
+                <tr>
+                  <td class="py-1 font-semibold text-accent">5. Isomerasas</td>
+                  <td class="py-1">Reordenamiento estructural intramolecular (isómeros).</td>
+                  <td class="py-1 font-mono">Triosa Fosfato Isomerasa (TPI)</td>
+                </tr>
+                <tr>
+                  <td class="py-1 font-semibold text-accent">6. Ligasas</td>
+                  <td class="py-1">Unión covalente de dos moléculas acoplada al gasto de $\text{ATP}$.</td>
+                  <td class="py-1 font-mono">Piruvato Carboxilasa, ADN ligasa</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 3. Inhibición Farmacológica Reversible -->
+        <div>
+          <h4 class="font-bold text-accent text-sm mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved"></i> 3. Modalidades de Inhibición Reversible
+          </h4>
+          <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-2 text-xs">
+            <p><strong>Inhibición Competitiva:</strong> El inhibidor compite por el sitio activo. Se incrementa la $K_m$ aparente (menor afinidad aparente) y se conserva la $\text{V}_{\text{max}}$ al saturar con $[\text{S}]$.</p>
+            <p><strong>Inhibición No Competitiva:</strong> El inhibidor se fija a un sitio alostérico. Disminuye la $\text{V}_{\text{max}}$ efectiva sin alterar la $K_m$ (no se supera con exceso de $[\text{S}]$).</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="bg-gray-50 p-4 border-t border-gray-200 flex justify-end">
+        <button onclick="closeFormulasModal()" class="px-5 py-2 bg-accent text-white font-semibold rounded-lg hover:bg-accent-hover text-xs transition shadow-sm">
+          Entendido
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Guía de Uso del Simulador -->
+  <div id="modal-tutorial" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white max-w-4xl w-full rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="bg-accent p-4 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-circle-question text-xl"></i>
+          <h3 class="font-bold text-base">Guía de Uso del Simulador: Enzimología y Cinética Médica</h3>
+        </div>
+        <button onclick="closeTutorial()" class="text-white hover:text-gray-200 transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      
+      <div class="p-6 overflow-y-auto space-y-6 text-xs md:text-sm text-gray-700 custom-scroll leading-relaxed">
+        
+        <div>
+          <h4 class="font-bold text-accent text-sm mb-1 flex items-center gap-2">
+            <i class="fa-solid fa-compass"></i> 1. Navegación Modular y Estructura del Simulador
+          </h4>
+          <p class="text-gray-600">
+            La plataforma está organizada en 6 módulos secuenciales accesibles desde la barra lateral izquierda. Cada sección está calibrada con parámetros cuantitativos reales de biofísica y bioquímica clínica:
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-accent text-sm mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-sliders"></i> 2. Módulos Interactivos y Herramientas Experimentales
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-1">
+              <div class="flex items-center gap-1.5 font-bold text-slate-800">
+                <i class="fa-solid fa-bolt text-accent"></i> Módulo 1: Perfil Energético y Coordenadas
+              </div>
+              <p class="text-gray-600">
+                Ajusta el slider de <strong>Grado de Catálisis Enzimática</strong> para visualizar en tiempo real cómo desciende la barrera de Gibbs ($E_a$) frente a la reacción no catalizada, comprobando la invariancia termodinámica de reactivos, productos y $\Delta G$.
+              </p>
+            </div>
+
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-1">
+              <div class="flex items-center gap-1.5 font-bold text-slate-800">
+                <i class="fa-solid fa-sitemap text-accent"></i> Módulo 2: Clasificador IUBMB (6 Clases)
+              </div>
+              <p class="text-gray-600">
+                Interactúa con los selectores de las 6 familias internacionales (Oxidorreductasas, Transferasas, Hidrolasas, Liasas, Isomerasas y Ligasas) para inspeccionar sus reacciones moleculares modelo, nomenclatura sistemática y relevancia clínica diagnóstica.
+              </p>
+            </div>
+
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-1">
+              <div class="flex items-center gap-1.5 font-bold text-slate-800">
+                <i class="fa-solid fa-key text-accent"></i> Módulo 3: Modelos de Interacción (Fischer vs. Koshland)
+              </div>
+              <p class="text-gray-600">
+                Ejecuta la animación comparativa entre la hipótesis estática de <em>Llave-Cerradura</em> y el modelo dinámico de <em>Ajuste Inducido</em> en la hexoquinasa humana, observando la exclusión activa de moléculas de agua para evitar la hidrólisis basal de ATP.
+              </p>
+            </div>
+
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-1">
+              <div class="flex items-center gap-1.5 font-bold text-slate-800">
+                <i class="fa-solid fa-chart-line text-accent"></i> Módulo 4: Laboratorio Cinético de Michaelis-Menten
+              </div>
+              <p class="text-gray-600">
+                Modifica los parámetros $\text{V}_{\text{max}}$, $K_m$ y concentración de sustrato $[\text{S}]$ para trazar la curva hiperbólica en tiempo real. Analiza además las campanas térmicas y de $\text{pH}$ con sus puntos de desnaturalización irreversible y óptimos fisiológicos.
+              </p>
+            </div>
+
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-1">
+              <div class="flex items-center gap-1.5 font-bold text-slate-800">
+                <i class="fa-solid fa-shield-halved text-accent"></i> Módulo 5: Inhibición y Vía Alostérica
+              </div>
+              <p class="text-gray-600">
+                Compara curvas cinéticas de inhibición competitiva vs. no competitiva, revisa la toxicología irreversible (cianuro y metales pesados) y experimenta con el slider del producto $\text{Z}$ en la vía $\text{W} \to \text{X} \to \text{Y} \to \text{Z}$ para observar el retrocontrol negativo sobre $\text{E}_1$.
+              </p>
+            </div>
+
+            <div class="p-3 bg-gray-50 rounded-xl border border-gray-200 space-y-1">
+              <div class="flex items-center gap-1.5 font-bold text-slate-800">
+                <i class="fa-solid fa-heart-pulse text-accent"></i> Módulo 6: Clínica Médica y Trombólisis
+              </div>
+              <p class="text-gray-600">
+                Inspecciona la gráfica temporal posinfarto de miocardio (0 a 168 h) con la cinética seriada de $\text{CK-MB}$, $\text{GOT/AST}$ y $\text{LDH}$, complementada con el fundamento de las tiras de glucemia y la enzimoterapia fibrinolítica (r-tPA).
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-accent text-sm mb-1 flex items-center gap-2">
+            <i class="fa-solid fa-graduation-cap"></i> 3. Consejos de Estudio para el Ingreso a Medicina UCCuyo
+          </h4>
+          <ul class="list-disc list-inside space-y-1 text-xs text-gray-600">
+            <li>Identifica siempre qué variables <strong>no modifica</strong> una enzima ($\Delta G$ y $K_{\text{eq}}$) frente a las que <strong>sí modifica</strong> ($E_a$ y velocidad de reacción).</li>
+            <li>Recuerda la relación inversa de la constante de Michaelis: a menor $K_m$, mayor es la afinidad de la enzima por su ligando.</li>
+            <li>En la inhibición competitiva la $\text{V}_{\text{max}}$ se conserva porque el exceso de sustrato desplaza al inhibidor, mientras que en la no competitiva la $\text{V}_{\text{max}}$ cae indefectiblemente.</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="bg-gray-50 p-4 border-t border-gray-200 flex justify-end">
+        <button onclick="closeTutorial()" class="px-5 py-2 bg-accent text-white font-semibold rounded-lg hover:bg-accent-hover text-xs transition shadow-sm">
+          ¡Entendido, Comenzar a Estudiar!
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TOAST NOTIFICATION CONTAINER ================= -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-xl flex items-center space-x-2 max-w-sm">
+    <span id="toastIcon">ℹ️</span>
+    <span id="toastMsg">Mensaje de notificación</span>
+  </div>
+
+  <!-- ================= JAVASCRIPT LOGIC & SIMULATORS ================= -->
+  <script>
+    /* Global Variables and State */
+    let michaelisChartInstance = null;
+    let tempChartInstance = null;
+    let phChartInstance = null;
+    let inhibChartInstance = null;
+    let iamChartInstance = null;
+
+    let currentInhibMode = 'competitive';
+    let isFischerFitted = false;
+    let isKoshlandFitted = false;
+
+    // Enzyme families database for Module 2
+    const enzymeClassesData = {
+      1: {
+        name: "1. Oxidorreductasas",
+        definition: "Catalizan la transferencia de electrones, átomos de hidrógeno (protones más electrones) o hidruros entre un agente donante y otro aceptor.",
+        subclasses: "Deshidrogenasas, oxidasas, peroxidasas, reductasas, oxigenasas.",
+        medicalExample: "Lactato Deshidrogenasa (LDH)",
+        reactionLatex: "$$\\text{Piruvato} + \\text{NADH} + \\text{H}^+ \\xrightleftharpoons{\\text{LDH}} \\text{L-Lactato} + \\text{NAD}^+$$",
+        clinicalRole: "Eje del metabolismo anaeróbico muscular y glucólisis eritrocitaria. En isquemia tisular o hipoxia celular, su elevación en plasma refleja recambio celular o necrosis."
+      },
+      2: {
+        name: "2. Transferasas",
+        definition: "Catalizan el traslado de grupos funcionales específicos (tales como metilo, amino, fosfato o acilo) desde una molécula donante hacia otra aceptora.",
+        subclasses: "Transaminasas (aminotransferasas), quinasas (fosfotransferasas), metiltransferasas.",
+        medicalExample: "Transaminasas Hepáticas: GOT/AST y GPT/ALT",
+        reactionLatex: "$$\\text{L-Alanina} + \\alpha\\text{-Cetoglutarato} \\xrightleftharpoons{\\text{GPT/ALT}} \\text{Piruvato} + \\text{L-Glutamato}$$",
+        clinicalRole: "Marcadores cardinales de lesión hepatocelular en hepatitis agudas virales o tóxicas. Las quinasas regulan las vías de señalización intracelular y el metabolismo de glúcidos."
+      },
+      3: {
+        name: "3. Hidrolasas",
+        definition: "Provocan la escisión o ruptura de enlaces químicos (C-O, C-N, C-C, esteres) introduciendo los elementos constitutivos de una molécula de agua ($\\text{H}_2\\text{O}$).",
+        subclasses: "Esterasas, lipasas, peptidasas/proteasas, glucosidasas, fosfatasas.",
+        medicalExample: "Amilasa, Lipasa Pancreática, Tripsina",
+        reactionLatex: "$$\\text{Triglicérido} + 2\\,\\text{H}_2\\text{O} \\xrightarrow{\\text{Lipasa Pancreática}} 2\\text{-Monoacilglicerol} + 2\\,\\text{Ácidos Grasos}$$",
+        clinicalRole: "Pilar de la digestión en el tracto gastrointestinal. La hiperamilasemia e hiperlipasemia plasmática constituyen el patrón de oro en el diagnóstico de pancreatitis aguda."
+      },
+      4: {
+        name: "4. Liasas",
+        definition: "Catalizan la ruptura de enlaces C-C, C-S, C-N o C-O sin hidrólisis ni oxidación, generando dobles enlaces, o bien adicionan grupos funcionales a dobles enlaces.",
+        subclasses: "Descarboxilasas, sintasas (sin gasto de ATP), aldolasas, anhidrasas.",
+        medicalExample: "Anhidrasa Carbónica (Eritrocitos y Túbulos Renales)",
+        reactionLatex: "$$\\text{CO}_2 + \\text{H}_2\\text{O} \\xrightleftharpoons{\\text{Anhidrasa Carbónica}} \\text{H}_2\\text{CO}_3 \\rightleftharpoons \\text{H}^+ + \\text{HCO}_3^-$$",
+        clinicalRole: "Fundamental para el transporte pulmonar de dióxido de carbono y el equilibrio ácido-base renal. Los diuréticos inhibidores de la anhidrasa regulan la presión ocular y la alcalinización urinaria."
+      },
+      5: {
+        name: "5. Isomerasas",
+        definition: "Catalizan el reordenamiento intramolecular de átomos, interconvirtiendo isómeros ópticos, geométricos o de posición sin cambiar la fórmula molecular global.",
+        subclasses: "Epimerasas, mutasas, cis-trans isomerasas, racemasas.",
+        medicalExample: "Fosfoglucoisomerasa y Triosa Fosfato Isomerasa (TPI)",
+        reactionLatex: "$$\\text{Dihidroxiacetona Fosfato} \\xrightleftharpoons{\\text{TPI}} \\text{D-Gliceraldehído 3-Fosfato}$$",
+        clinicalRole: "Permite la continuidad sinérgica de la vía glucolítica aeróbica y anaeróbica unificando los productos de la lisis de la fructosa 1,6-bisfosfato."
+      },
+      6: {
+        name: "6. Ligasas",
+        definition: "Catalizan la unión covalente de dos moléculas mediante la formación de enlaces C-C, C-S, C-O o C-N, acoplada indisolublemente a la hidrólisis de un nucleósido trifosfato (ATP o GTP).",
+        subclasses: "Sintetasas (con gasto de ATP), carboxilasas dependientes de biotina, ADN ligasas.",
+        medicalExample: "Piruvato Carboxilasa (Gluconeogénesis)",
+        reactionLatex: "$$\\text{Piruvato} + \\text{HCO}_3^- + \\text{ATP} \\xrightarrow{\\text{Piruvato Carboxilasa}} \\text{Oxalacetato} + \\text{ADP} + \\text{P}_i$$",
+        clinicalRole: "Reacción anaplerótica clave del ciclo de Krebs y síntesis de glucosa de novo durante el ayuno prolongado. Las ADN ligasas son vitales en la reparación del genoma frente a radiación ionizante."
+      }
+    };
+
+    // Quiz Questions Data for Module 7
+    const quizQuestions = [
+      {
+        question: "1. Si una reacción química posee un $\\Delta G = +15\\,\\text{kJ/mol}$, ¿qué efecto tendrá la adición de su enzima específica sobre la espontaneidad y la velocidad?",
+        options: [
+          "La enzima volverá exergónico el proceso ($\\Delta G < 0$) y aumentará la velocidad.",
+          "La enzima no modificará el $\\Delta G$ (seguirá siendo endergónica no espontánea), pero incrementará la constante de velocidad con la que se alcanza el equilibrio.",
+          "La enzima incrementará la energía libre de los reactivos disminuyendo la $K_{\\text{eq}}$.",
+          "La enzima desplazará la reacción completamente hacia la derecha duplicando el $\\text{V}_{\\text{max}}$."
+        ],
+        correct: 1,
+        explanation: "Las enzimas NUNCA modifican el $\\Delta G$ termodinámico ni la $K_{\\text{eq}}$. Solo rebajan la energía libre de activación ($E_a$), acelerando la tasa cinética en ambos sentidos."
+      },
+      {
+        question: "2. En presencia de un inhibidor enzimático competitivo, ¿cómo se comportan los parámetros cinéticos de Michaelis-Menten en comparación con el control?",
+        options: [
+          "Disminuye la $\\text{V}_{\\text{max}}$ y la $K_m$ permanece constante.",
+          "Aumenta la $\\text{V}_{\\text{max}}$ y disminuye la $K_m$ aparente.",
+          "La $\\text{V}_{\\text{max}}$ se conserva idéntica y la $K_m$ aparente aumenta.",
+          "Ambos parámetros ($K_m$ y $\\text{V}_{\\text{max}}$) disminuyen proporcionalmente."
+        ],
+        correct: 2,
+        explanation: "En la inhibición competitiva, el inhibidor disputa el sitio activo. Un exceso de sustrato desplaza al inhibidor restaurando la $\\text{V}_{\\text{max}}$, pero se requiere más sustrato para llegar a $\\frac{\\text{V}_{\\text{max}}}{2}$, aumentando la $K_m$ aparente (menor afinidad aparente)."
+      },
+      {
+        question: "3. Un paciente ingresa al Servicio de Emergencias con dolor precordial opresivo iniciado hace 16 horas. ¿Cuál biomarcador enzimático cardíaco se espera encontrar en su máxima tasa de elevación sérica proporcional?",
+        options: [
+          "Lactato Deshidrogenasa (LDH), que alcanza su pico a las 12 horas.",
+          "Creatina Quinasa Isoenzima MB (CK-MB), cuyo pico ocurre típicamente entre las 18 y 24 horas del infarto.",
+          "Fosfatasa Alcalina hepática.",
+          "Amilasa pancreática acoplada a tripsinógeno."
+        ],
+        correct: 1,
+        explanation: "La CK-MB se eleva a partir de las 4-6 h con un cenit clínico crucial entre las 18 y 24 horas del evento isquémico agudo miocárdico."
+      },
+      {
+        question: "4. ¿Por qué la hexoquinasa induce el acercamiento estrecho de sus dominios sobre la molécula de D-glucosa (Ajuste Inducido) excluyendo el agua del sitio activo?",
+        options: [
+          "Para acidificar el microambiente a un $\\text{pH} = 1.5$.",
+          "Para impedir que el agua actúe como aceptor nucleofílico del fosfato y se produzca la hidrólisis no productiva de ATP.",
+          "Para destruir la apoenzima y transformarla en grupo prostético.",
+          "Para oxidar irreversiblemente la glucosa a ácido glucónico antes de la fosforilación."
+        ],
+        correct: 1,
+        explanation: "Si el bolsillo catalítico permaneciera abierto, el agua del solvente (en concentración $\\approx 55.5\\,\\text{M}$) hidrolizaría el ATP en ADP y fosfato inorgánico sin transferirlo a la glucosa."
+      }
+    ];
+
+    let userAnswers = {};
+
+    /* Modal Handlers */
+    function openFormulasModal() {
+      const modal = document.getElementById('modal-formulas');
+      if (modal) {
+        modal.classList.remove('hidden');
+        try {
+          if (typeof renderMathInElement === 'function') {
+            renderMathInElement(modal, {
+              delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false }
+              ],
+              throwOnError: false
+            });
+          }
+        } catch (e) {
+          console.warn('KaTeX render warning:', e);
+        }
+      }
+    }
+
+    function closeFormulasModal() {
+      const modal = document.getElementById('modal-formulas');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function openTutorial() {
+      const modal = document.getElementById('modal-tutorial');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeTutorial() {
+      const modal = document.getElementById('modal-tutorial');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    /* Tab Switching Functionality (Sidebar UCCuyo) */
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+
+      const selectedTab = document.getElementById(tabId);
+      if (selectedTab) {
+        selectedTab.classList.remove('hidden');
+      }
+
+      document.querySelectorAll('#navTabs .nav-btn').forEach(btn => {
+        const isSelected = btn.getAttribute('data-tab') === tabId;
+        const isLast = btn.getAttribute('data-last') === 'true';
+        const borderClass = isLast ? ' border-t lg:border-t border-gray-100' : '';
+        
+        if (isSelected) {
+          btn.className = "nav-btn bg-accent text-white flex-1 lg:flex-none text-left py-2.5 px-4 rounded-xl text-xs sm:text-sm font-semibold transition shadow-sm flex items-center gap-2" + borderClass;
+        } else {
+          btn.className = "nav-btn text-gray-700 hover:bg-gray-100 flex-1 lg:flex-none text-left py-2.5 px-4 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-2" + borderClass;
+        }
+      });
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Re-trigger Canvas or Chart renders if switching to their tabs
+      if (tabId === 'tab-termo') {
+        drawReactionCoordinates();
+      } else if (tabId === 'tab-cinetica') {
+        setTimeout(() => {
+          if (michaelisChartInstance) michaelisChartInstance.resize();
+          if (tempChartInstance) tempChartInstance.resize();
+          if (phChartInstance) phChartInstance.resize();
+        }, 80);
+      } else if (tabId === 'tab-inhibicion') {
+        setTimeout(() => {
+          if (inhibChartInstance) inhibChartInstance.resize();
+        }, 80);
+      } else if (tabId === 'tab-clinica') {
+        setTimeout(() => {
+          if (iamChartInstance) iamChartInstance.resize();
+        }, 80);
+      }
+
+      // Render math when switching
+      if (window.renderMathInElement) {
+        renderMathInElement(document.body, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false }
+          ],
+          ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'header'],
+          ignoredClasses: ['katex', 'katex-html', 'katex-mathml', 'ignore-math', 'no-math'],
+          throwOnError: false
+        });
+      }
+    }
+
+    /* Helper: Toast Notifications */
+    function showToast(msg, icon = 'ℹ️') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      const toastIcon = document.getElementById('toastIcon');
+      toastMsg.innerText = msg;
+      toastIcon.innerText = icon;
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3200);
+    }
+
+    /* ================= 1. REACTION COORDINATE SIMULATOR (CANVAS) ================= */
+    const reactionCanvas = document.getElementById('reactionCanvas');
+    const ctxReaction = reactionCanvas.getContext('2d');
+    const catalysisSlider = document.getElementById('catalysisSlider');
+    const catalysisValueText = document.getElementById('catalysisValue');
+    const eaUncatVal = document.getElementById('eaUncatVal');
+    const eaCatVal = document.getElementById('eaCatVal');
+
+    function resizeReactionCanvas() {
+      const rect = reactionCanvas.parentElement.getBoundingClientRect();
+      reactionCanvas.width = rect.width * window.devicePixelRatio;
+      reactionCanvas.height = 320 * window.devicePixelRatio;
+      ctxReaction.scale(window.devicePixelRatio, window.devicePixelRatio);
+      drawReactionCoordinates();
+    }
+
+    function drawReactionCoordinates() {
+      const width = reactionCanvas.width / window.devicePixelRatio;
+      const height = reactionCanvas.height / window.devicePixelRatio;
+
+      ctxReaction.clearRect(0, 0, width, height);
+
+      const margin = { top: 40, right: 30, bottom: 50, left: 60 };
+      const plotW = width - margin.left - margin.right;
+      const plotH = height - margin.top - margin.bottom;
+
+      // Coordinate axes
+      ctxReaction.strokeStyle = '#94a3b8';
+      ctxReaction.lineWidth = 1.5;
+      ctxReaction.beginPath();
+      // Y axis
+      ctxReaction.moveTo(margin.left, margin.top);
+      ctxReaction.lineTo(margin.left, margin.top + plotH);
+      // X axis
+      ctxReaction.lineTo(margin.left + plotW, margin.top + plotH);
+      ctxReaction.stroke();
+
+      // Axis labels
+      ctxReaction.fillStyle = '#475569';
+      ctxReaction.font = 'bold 11px Inter, sans-serif';
+      ctxReaction.fillText('Energía Libre (G)', margin.left - 45, margin.top - 15);
+      ctxReaction.fillText('Avance de la Reacción (Coordenada)', margin.left + plotW * 0.45, margin.top + plotH + 35);
+
+      // Energy baselines
+      const gReactants = margin.top + plotH * 0.65; // Reactivos
+      const gProducts = margin.top + plotH * 0.85;  // Productos (Exergónica, ΔG < 0)
+
+      // Peak of Uncatalyzed:
+      const peakUncat = margin.top + plotH * 0.10; // High peak
+      
+      // Peak of Catalyzed based on slider
+      const sliderReduction = parseFloat(catalysisSlider.value) / 100; // e.g. 0.75
+      const peakCat = peakUncat + (gReactants - peakUncat) * (sliderReduction * 0.85);
+
+      // Reactants Plateau
+      const xReactStart = margin.left + 10;
+      const xReactEnd = margin.left + plotW * 0.22;
+
+      // Products Plateau
+      const xProdStart = margin.left + plotW * 0.78;
+      const xProdEnd = margin.left + plotW - 10;
+
+      // Draw Reactants Line
+      ctxReaction.strokeStyle = '#0f172a';
+      ctxReaction.lineWidth = 3;
+      ctxReaction.beginPath();
+      ctxReaction.moveTo(xReactStart, gReactants);
+      ctxReaction.lineTo(xReactEnd, gReactants);
+      ctxReaction.stroke();
+
+      ctxReaction.fillStyle = '#0f172a';
+      ctxReaction.font = 'bold 12px Inter, sans-serif';
+      ctxReaction.fillText('Reactivos (E + S)', xReactStart + 5, gReactants - 10);
+
+      // Draw Products Line
+      ctxReaction.beginPath();
+      ctxReaction.moveTo(xProdStart, gProducts);
+      ctxReaction.lineTo(xProdEnd, gProducts);
+      ctxReaction.stroke();
+      ctxReaction.fillText('Productos (E + P)', xProdStart, gProducts + 22);
+
+      // 1. Uncatalyzed Curve (Red dashed/solid)
+      ctxReaction.strokeStyle = '#ef4444';
+      ctxReaction.lineWidth = 2.5;
+      ctxReaction.beginPath();
+      ctxReaction.moveTo(xReactEnd, gReactants);
+      ctxReaction.bezierCurveTo(
+        margin.left + plotW * 0.35, peakUncat,
+        margin.left + plotW * 0.60, peakUncat,
+        xProdStart, gProducts
+      );
+      ctxReaction.stroke();
+
+      // State of transition marker uncatalyzed
+      const xMid = margin.left + plotW * 0.48;
+      ctxReaction.fillStyle = '#ef4444';
+      ctxReaction.beginPath();
+      ctxReaction.arc(xMid, peakUncat, 4, 0, Math.PI * 2);
+      ctxReaction.fill();
+      ctxReaction.font = 'bold 11px Inter, sans-serif';
+      ctxReaction.fillText('Estado de Transición No Catalizado (S‡)', xMid - 95, peakUncat - 10);
+
+      // 2. Catalyzed Curve (Sky Blue Solid)
+      ctxReaction.strokeStyle = '#0284c7';
+      ctxReaction.lineWidth = 3.5;
+      ctxReaction.beginPath();
+      ctxReaction.moveTo(xReactEnd, gReactants);
+      // Small ES dip, then lower transition peak, then EP dip
+      const xES = margin.left + plotW * 0.30;
+      const yES = gReactants + 5;
+      const xEP = margin.left + plotW * 0.68;
+      const yEP = gProducts + 3;
+
+      ctxReaction.bezierCurveTo(
+        xES - 15, gReactants,
+        xES, yES,
+        margin.left + plotW * 0.38, peakCat
+      );
+      ctxReaction.bezierCurveTo(
+        margin.left + plotW * 0.45, peakCat,
+        xMid + 10, peakCat,
+        margin.left + plotW * 0.58, peakCat + 10
+      );
+      ctxReaction.bezierCurveTo(
+        xEP - 10, yEP,
+        xEP, yEP,
+        xProdStart, gProducts
+      );
+      ctxReaction.stroke();
+
+      // ES‡ marker
+      ctxReaction.fillStyle = '#0284c7';
+      ctxReaction.beginPath();
+      ctxReaction.arc(margin.left + plotW * 0.48, peakCat + 2, 4.5, 0, Math.PI * 2);
+      ctxReaction.fill();
+      ctxReaction.fillText('Complejo ES‡ Catalizado', margin.left + plotW * 0.48 - 65, peakCat - 12);
+
+      // Vertical Ea Arrow Uncatalyzed
+      drawArrow(ctxReaction, margin.left + plotW * 0.40, gReactants, margin.left + plotW * 0.40, peakUncat, '#ef4444', 'Ea no catalizada');
+
+      // Vertical Ea Arrow Catalyzed
+      drawArrow(ctxReaction, margin.left + plotW * 0.56, gReactants, margin.left + plotW * 0.56, peakCat + 2, '#0284c7', 'Ea con enzima');
+
+      // Net Delta G Arrow at the right
+      drawArrow(ctxReaction, margin.left + plotW * 0.90, gReactants, margin.left + plotW * 0.90, gProducts, '#059669', 'ΔG < 0 (Constante)');
+
+      // Update text values
+      const baseEa = 85.0; // kJ/mol
+      const catEa = (baseEa * (1 - sliderReduction * 0.8)).toFixed(1);
+      eaCatVal.innerText = `${catEa} kJ/mol`;
+      catalysisValueText.innerText = `${catalysisSlider.value}% de Reducción de Ea`;
+    }
+
+    function drawArrow(ctx, fromx, fromy, tox, toy, color, label) {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([3, 3]);
+
+      ctx.beginPath();
+      ctx.moveTo(fromx, fromy);
+      ctx.lineTo(tox, toy);
+      ctx.stroke();
+
+      // Arrowheads
+      ctx.setLineDash([]);
+      const headlen = 6;
+      const angle = Math.atan2(toy - fromy, tox - fromx);
+      ctx.beginPath();
+      ctx.moveTo(tox, toy);
+      ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+      ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+      ctx.fill();
+
+      // Label
+      ctx.font = 'bold 10px Inter, sans-serif';
+      ctx.fillText(label, fromx + 6, (fromy + toy) / 2);
+      ctx.restore();
+    }
+
+    catalysisSlider.addEventListener('input', drawReactionCoordinates);
+    window.addEventListener('resize', resizeReactionCanvas);
+
+    /* ================= 2. ENZYME IUBMB CLASSIFIER ================= */
+    function showEnzymeClass(classIndex) {
+      const data = enzymeClassesData[classIndex];
+      const detailCard = document.getElementById('enzymeDetailCard');
+      const buttons = document.querySelectorAll('.iubmb-btn');
+
+      buttons.forEach((btn, idx) => {
+        if (idx === classIndex - 1) {
+          btn.className = "iubmb-btn p-3 rounded-xl border border-sky-600 bg-sky-50 text-sky-900 font-bold text-xs text-center transition-all shadow-sm";
+        } else {
+          btn.className = "iubmb-btn p-3 rounded-xl border border-slate-200 hover:border-slate-300 text-slate-700 font-semibold text-xs text-center transition-all";
+        }
+      });
+
+      detailCard.innerHTML = `
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b border-slate-200 pb-3 mb-4">
+          <div>
+            <span class="text-[11px] font-bold text-sky-700 uppercase tracking-wider">Clase Sistemática IUBMB #${classIndex}</span>
+            <h3 class="text-xl font-bold text-slate-900">${data.name}</h3>
+          </div>
+          <span class="text-xs bg-sky-100 text-sky-800 font-medium px-3 py-1 rounded-full border border-sky-200">
+            Ejemplo Prototípico: ${data.medicalExample}
+          </span>
+        </div>
+
+        <div class="space-y-3 text-xs text-slate-700">
+          <p class="text-sm text-slate-800 leading-relaxed font-medium">
+            <strong>Mecanismo Catalítico:</strong> ${data.definition}
+          </p>
+          <p>
+            <strong>Subfamilias Relevantes:</strong> ${data.subclasses}
+          </p>
+          
+          <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm text-center my-3">
+            <span class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Reacción Bioquímica Característica</span>
+            <div class="latex-eq text-sky-950 font-semibold">
+              ${data.reactionLatex}
+            </div>
+          </div>
+
+          <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-emerald-950">
+            <strong>Relevancia Médica y Diagnóstica:</strong> ${data.clinicalRole}
+          </div>
+        </div>
+      `;
+
+      renderMathInElement(detailCard, {
+        delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false}
+        ],
+        throwOnError: false
+      });
+    }
+
+    /* ================= 3. ACTIVE SITE INTERACTION MODELS ================= */
+    function toggleFischerFit() {
+      const sub = document.getElementById('fischerSubstrate');
+      const btn = document.getElementById('btnFischer');
+      isFischerFitted = !isFischerFitted;
+
+      if (isFischerFitted) {
+        sub.style.transform = 'translate(-138px, -8px)';
+        btn.innerText = 'Desacoplar Sustrato';
+        btn.classList.replace('bg-sky-600', 'bg-slate-700');
+        showToast('Modelo Llave-Cerradura: Encaje estático rígido sin deformación conformacional.', '🔒');
+      } else {
+        sub.style.transform = 'translate(0px, 0px)';
+        btn.innerText = 'Simular Acoplamiento';
+        btn.classList.replace('bg-slate-700', 'bg-sky-600');
+      }
+    }
+
+    function toggleInducedFit() {
+      const sub = document.getElementById('koshlandSubstrate');
+      const leftLobe = document.getElementById('koshlandLeftLobe');
+      const rightLobe = document.getElementById('koshlandRightLobe');
+      const btn = document.getElementById('btnKoshland');
+      isKoshlandFitted = !isKoshlandFitted;
+
+      if (isKoshlandFitted) {
+        // Move substrate into pocket
+        sub.style.transform = 'translate(0px, 32px)';
+        // Close lobes
+        leftLobe.setAttribute('d', 'M 40,20 Q 95,45 125,50 L 115,80 Q 70,100 40,90 Z');
+        rightLobe.setAttribute('d', 'M 220,20 Q 165,45 135,50 L 145,80 Q 190,100 220,90 Z');
+        btn.innerText = 'Reabrir Hendidura (Liberar)';
+        btn.classList.replace('bg-emerald-600', 'bg-slate-700');
+        showToast('Ajuste Inducido: Dominios proteicos rotan, sellan el bolsillo y excluyen agua.', '🧬');
+      } else {
+        sub.style.transform = 'translate(0px, 0px)';
+        leftLobe.setAttribute('d', 'M 40,20 Q 90,30 110,50 L 110,80 Q 70,100 40,90 Z');
+        rightLobe.setAttribute('d', 'M 220,20 Q 170,30 150,50 L 150,80 Q 190,100 220,90 Z');
+        btn.innerText = 'Inducir Cambio Conformacional';
+        btn.classList.replace('bg-slate-700', 'bg-emerald-600');
+      }
+    }
+
+    /* ================= 4. MICHAELIS-MENTEN & MICROENVIRONMENT CHARTS ================= */
+    const vmaxSlider = document.getElementById('vmaxSlider');
+    const kmSlider = document.getElementById('kmSlider');
+    const sSlider = document.getElementById('sSlider');
+    const vmaxDisplay = document.getElementById('vmaxDisplay');
+    const kmDisplay = document.getElementById('kmDisplay');
+    const sValDisplay = document.getElementById('sValDisplay');
+    const calculatedV0 = document.getElementById('calculatedV0');
+    const v0PercentageBadge = document.getElementById('v0PercentageBadge');
+
+    function initMichaelisChart() {
+      const ctx = document.getElementById('michaelisChart').getContext('2d');
+      
+      const sPoints = [];
+      for (let s = 0; s <= 100; s += 2) {
+        sPoints.push(s);
+      }
+
+      michaelisChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: sPoints,
+          datasets: [
+            {
+              label: 'Velocidad Inicial (V0)',
+              data: [],
+              borderColor: '#e11d48',
+              backgroundColor: 'rgba(225, 29, 72, 0.08)',
+              borderWidth: 3,
+              fill: true,
+              tension: 0.2,
+              pointRadius: 0
+            },
+            {
+              label: 'Vmax Asintótica',
+              data: [],
+              borderColor: '#94a3b8',
+              borderWidth: 2,
+              borderDash: [5, 5],
+              pointRadius: 0,
+              fill: false
+            },
+            {
+              label: 'Vmax / 2',
+              data: [],
+              borderColor: '#0284c7',
+              borderWidth: 1.5,
+              borderDash: [3, 3],
+              pointRadius: 0,
+              fill: false
+            },
+            {
+              label: 'Punto Operativo Actual',
+              data: [],
+              borderColor: '#059669',
+              backgroundColor: '#059669',
+              pointRadius: 6,
+              pointHoverRadius: 8,
+              showLine: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { boxWidth: 12, font: { size: 10, family: 'Inter' } }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: ${context.parsed.y.toFixed(2)} μmol/min`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              title: { display: true, text: 'Concentración de Sustrato [S] (mM)', font: { size: 11, weight: 'bold' } },
+              grid: { color: '#f1f5f9' }
+            },
+            y: {
+              title: { display: true, text: 'Velocidad Inicial V0 (μmol/min)', font: { size: 11, weight: 'bold' } },
+              min: 0,
+              max: 220,
+              grid: { color: '#f1f5f9' }
+            }
+          }
+        }
+      });
+
+      updateMichaelisData();
+    }
+
+    function updateMichaelisData() {
+      const vmax = parseFloat(vmaxSlider.value);
+      const km = parseFloat(kmSlider.value);
+      const currentS = parseFloat(sSlider.value);
+
+      vmaxDisplay.innerText = `${vmax} μmol/min`;
+      kmDisplay.innerText = `${km} mM`;
+      sValDisplay.innerText = `${currentS} mM`;
+
+      const v0Calc = (vmax * currentS) / (km + currentS);
+      calculatedV0.innerText = `${v0Calc.toFixed(2)} μmol/min`;
+      const pct = ((v0Calc / vmax) * 100).toFixed(1);
+      v0PercentageBadge.innerText = `(${pct}% de la Vmax teórica)`;
+
+      const sPoints = michaelisChartInstance.data.labels;
+      const v0Data = [];
+      const vmaxLine = [];
+      const halfVmaxLine = [];
+
+      sPoints.forEach(s => {
+        v0Data.push((vmax * s) / (km + s));
+        vmaxLine.push(vmax);
+        halfVmaxLine.push(vmax / 2);
+      });
+
+      michaelisChartInstance.data.datasets[0].data = v0Data;
+      michaelisChartInstance.data.datasets[1].data = vmaxLine;
+      michaelisChartInstance.data.datasets[2].data = halfVmaxLine;
+
+      // Current operational point
+      michaelisChartInstance.data.datasets[3].data = sPoints.map(s => (s === Math.round(currentS) ? v0Calc : null));
+
+      michaelisChartInstance.update('none');
+    }
+
+    function resetMichaelisDefaults() {
+      vmaxSlider.value = 100;
+      kmSlider.value = 15;
+      sSlider.value = 15;
+      updateMichaelisData();
+      showToast('Parámetros de Michaelis-Menten restablecidos.', '🔄');
+    }
+
+    [vmaxSlider, kmSlider, sSlider].forEach(slider => {
+      slider.addEventListener('input', updateMichaelisData);
+    });
+
+    /* Temperature and pH Curves */
+    function initMicroenvironmentCharts() {
+      // Temperature Chart
+      const ctxT = document.getElementById('tempChart').getContext('2d');
+      const tempLabels = [];
+      const tempData = [];
+      for (let t = 10; t <= 65; t += 1) {
+        tempLabels.push(`${t}°C`);
+        // Biological bell curve skewed: Arrhenius acceleration until ~37-40C, then sharp denaturing drop
+        let v = 0;
+        if (t <= 37) {
+          v = Math.pow(1.08, t - 10) * 12;
+        } else if (t <= 42) {
+          v = 100 - (t - 37) * 4;
+        } else {
+          v = Math.max(0, 80 - Math.pow(t - 42, 1.8) * 4);
+        }
+        tempData.push(v);
+      }
+
+      tempChartInstance = new Chart(ctxT, {
+        type: 'line',
+        data: {
+          labels: tempLabels,
+          datasets: [{
+            label: 'Actividad Enzimática Relativa (%)',
+            data: tempData,
+            borderColor: '#e11d48',
+            backgroundColor: 'rgba(225, 29, 72, 0.1)',
+            fill: true,
+            tension: 0.3,
+            borderWidth: 2.5,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { maxTicksLimit: 8, font: { size: 9 } } },
+            y: { min: 0, max: 110, ticks: { font: { size: 9 } } }
+          }
+        }
+      });
+
+      // pH Chart
+      const ctxPH = document.getElementById('phChart').getContext('2d');
+      const phLabels = [];
+      const pepsinData = [];
+      const trypsinData = [];
+
+      for (let ph = 0; ph <= 12; ph += 0.25) {
+        phLabels.push(ph.toFixed(2));
+        // Pepsin peak ~1.8
+        const pepsin = Math.max(0, 100 * Math.exp(-Math.pow(ph - 1.8, 2) / 0.8));
+        pepsinData.push(pepsin);
+        // Trypsin peak ~7.8
+        const trypsin = Math.max(0, 100 * Math.exp(-Math.pow(ph - 7.8, 2) / 1.5));
+        trypsinData.push(trypsin);
+      }
+
+      phChartInstance = new Chart(ctxPH, {
+        type: 'line',
+        data: {
+          labels: phLabels,
+          datasets: [
+            {
+              label: 'Pepsina (Gástrica, óptimo ~1.8)',
+              data: pepsinData,
+              borderColor: '#d97706',
+              backgroundColor: 'rgba(217, 119, 6, 0.08)',
+              fill: true,
+              borderWidth: 2.5,
+              pointRadius: 0
+            },
+            {
+              label: 'Tripsina (Pancreática, óptimo ~7.8)',
+              data: trypsinData,
+              borderColor: '#0284c7',
+              backgroundColor: 'rgba(2, 132, 199, 0.08)',
+              fill: true,
+              borderWidth: 2.5,
+              pointRadius: 0
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }
+          },
+          scales: {
+            x: { title: { display: true, text: 'pH del Medio', font: { size: 10 } }, ticks: { maxTicksLimit: 7 } },
+            y: { min: 0, max: 110 }
+          }
+        }
+      });
+    }
+
+    /* ================= 5. INHIBITION & ALLOSTERIC FEEDBACK ================= */
+    function initInhibitionChart() {
+      const ctx = document.getElementById('inhibChart').getContext('2d');
+      const sPoints = [];
+      for (let s = 0; s <= 100; s += 2) sPoints.push(s);
+
+      inhibChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: sPoints,
+          datasets: [
+            {
+              label: 'Enzima Control (Sin Inhibidor)',
+              data: [],
+              borderColor: '#0284c7',
+              borderWidth: 3,
+              pointRadius: 0,
+              fill: false
+            },
+            {
+              label: 'Con Inhibidor',
+              data: [],
+              borderColor: '#e11d48',
+              borderWidth: 3,
+              borderDash: [4, 4],
+              pointRadius: 0,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }
+          },
+          scales: {
+            x: { title: { display: true, text: 'Concentración de Sustrato [S] (mM)' } },
+            y: { title: { display: true, text: 'Velocidad Inicial V0 (μmol/min)' }, min: 0, max: 120 }
+          }
+        }
+      });
+
+      updateInhibitionPlot();
+    }
+
+    function setInhibitionMode(mode) {
+      currentInhibMode = mode;
+      const btnComp = document.getElementById('btnInhibComp');
+      const btnNonComp = document.getElementById('btnInhibNonComp');
+
+      if (mode === 'competitive') {
+        btnComp.className = "px-3.5 py-1.5 rounded-lg bg-white text-sky-800 shadow-sm transition-all";
+        btnNonComp.className = "px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all";
+      } else {
+        btnNonComp.className = "px-3.5 py-1.5 rounded-lg bg-white text-rose-800 shadow-sm transition-all";
+        btnComp.className = "px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition-all";
+      }
+
+      updateInhibitionPlot();
+    }
+
+    function updateInhibitionPlot() {
+      const sPoints = inhibChartInstance.data.labels;
+      const baseVmax = 100;
+      const baseKm = 12;
+
+      const controlData = [];
+      const inhibData = [];
+
+      let effVmax = baseVmax;
+      let effKm = baseKm;
+
+      const explanationBox = document.getElementById('inhibExplanationBox');
+
+      if (currentInhibMode === 'competitive') {
+        effVmax = baseVmax;      // Vmax stays identical
+        effKm = baseKm * 3.2;   // Km increases ~3.2x
+
+        explanationBox.className = "p-4 rounded-xl border border-sky-200 bg-sky-50 text-slate-800";
+        explanationBox.innerHTML = `
+          <div class="flex items-center space-x-2 text-sky-800 font-bold mb-1">
+            <span>Inhibición Competitiva Activa</span>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            El inhibidor compite directamente con el sustrato por el sitio ortostérico. A concentraciones elevadas de $[\\text{S}]$, el sustrato desplaza al fármaco por acción de masas, alcanzando intacta la <strong>$\\text{V}_{\\text{max}} = 100\\,\\mu\\text{mol/min}$</strong>. Sin embargo, la constante aparente se triplica (<strong>$K_m = ${(effKm).toFixed(1)}\\,\\text{mM}$</strong>).
+          </p>
+        `;
+      } else {
+        effVmax = baseVmax * 0.45; // Vmax drops to 45%
+        effKm = baseKm;           // Km stays identical
+
+        explanationBox.className = "p-4 rounded-xl border border-rose-200 bg-rose-50 text-slate-800";
+        explanationBox.innerHTML = `
+          <div class="flex items-center space-x-2 text-rose-800 font-bold mb-1">
+            <span>Inhibición No Competitiva Activa</span>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            El inhibidor se une a un sitio alostérico regulador independientemente de si el sustrato está unido o no ($[\\text{EI}]$ y $[\\text{ESI}]$ inactivos). Esto inutiliza una fracción de enzimas reduciendo la <strong>$\\text{V}_{\\text{max}}$ efectiva a ${(effVmax).toFixed(1)}\\,\\mu\\text{mol/min}$</strong>. Aumentar $[\\text{S}]$ no revierte la inhibición. La afinidad de las enzimas intactas no cambia (<strong>$K_m = ${baseKm}\\,\\text{mM}$</strong>).
+          </p>
+        `;
+      }
+
+      sPoints.forEach(s => {
+        controlData.push((baseVmax * s) / (baseKm + s));
+        inhibData.push((effVmax * s) / (effKm + s));
+      });
+
+      inhibChartInstance.data.datasets[0].data = controlData;
+      inhibChartInstance.data.datasets[1].data = inhibData;
+      inhibChartInstance.data.datasets[1].label = currentInhibMode === 'competitive' ? 'Inhibidor Competitivo (Km mayor)' : 'Inhibidor No Competitivo (Vmax menor)';
+      inhibChartInstance.update();
+
+      renderMathInElement(explanationBox, {
+        delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false}
+        ],
+        throwOnError: false
+      });
+    }
+
+    // Allosteric Simulation
+    function updateAllostericSimulation() {
+      const zVal = parseInt(document.getElementById('productZLevel').value, 10);
+      document.getElementById('productZLabel').innerText = `${zVal}%`;
+
+      const e1Indicator = document.getElementById('e1Indicator');
+      const e1StateText = document.getElementById('e1StateText');
+      const feedbackDot = document.getElementById('feedbackDot');
+      const feedbackStatusDesc = document.getElementById('feedbackStatusDesc');
+      const fluxRateLabel = document.getElementById('fluxRateLabel');
+      const productZNode = document.getElementById('productZNode');
+
+      const flux = Math.max(5, 100 - zVal * 0.95);
+      fluxRateLabel.innerText = `Flujo Vía: ${flux.toFixed(0)}%`;
+
+      if (zVal < 40) {
+        // High activity R-state
+        e1Indicator.className = "px-3 py-1.5 rounded-lg bg-emerald-500 text-slate-950 font-bold text-xs shadow-lg transition-all";
+        e1StateText.innerText = "Estado R (Relajado / Alta Afinidad)";
+        e1StateText.className = "text-[10px] text-emerald-400 font-mono mt-1";
+        feedbackDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400";
+        feedbackStatusDesc.innerText = `Flujo sostenido: [Z] fisiológico bajo. La enzima E1 cataliza activamente la conversión de W en X.`;
+        productZNode.style.opacity = '0.5';
+      } else if (zVal < 70) {
+        // Intermediate transition
+        e1Indicator.className = "px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs shadow-lg transition-all";
+        e1StateText.innerText = "Transición Alostérica Parcial";
+        e1StateText.className = "text-[10px] text-amber-400 font-mono mt-1";
+        feedbackDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
+        feedbackStatusDesc.innerText = `Retroalimentación moderada: Moléculas de Z comienzan a ocupar el sitio alostérico de E1.`;
+        productZNode.style.opacity = '0.8';
+      } else {
+        // Shut down T-state
+        e1Indicator.className = "px-3 py-1.5 rounded-lg bg-rose-600 text-white font-bold text-xs shadow-lg transition-all animate-pulse";
+        e1StateText.innerText = "Estado T (Tenso / Inactivo por Feedback)";
+        e1StateText.className = "text-[10px] text-rose-400 font-mono mt-1 font-bold";
+        feedbackDot.className = "w-2.5 h-2.5 rounded-full bg-rose-500";
+        feedbackStatusDesc.innerText = `¡Frenado Metabólico Completo! Exceso acumulado de Z bloquea alostéricamente a E1 para evitar gasto inútil de metabolitos y ATP.`;
+        productZNode.style.opacity = '1.0';
+      }
+    }
+
+    /* ================= 6. CLINICAL IAM BIOMARKERS CHART ================= */
+    function initIamChart() {
+      const ctx = document.getElementById('iamChart').getContext('2d');
+      const hours = [0, 4, 8, 12, 18, 24, 36, 48, 72, 96, 120, 144, 168];
+
+      // Normalized relative serum levels (1 = baseline)
+      const ckmb = [1, 2.5, 6.0, 12.0, 18.0, 15.0, 7.0, 2.8, 1.2, 1.0, 1.0, 1.0, 1.0];
+      const gotAst = [1, 1.2, 2.8, 5.0, 7.5, 9.5, 8.0, 5.5, 2.5, 1.5, 1.0, 1.0, 1.0];
+      const ldh = [1, 1.0, 1.2, 1.8, 2.5, 3.8, 5.2, 7.0, 8.5, 7.5, 5.5, 3.5, 1.8];
+
+      iamChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: hours.map(h => `${h}h`),
+          datasets: [
+            {
+              label: 'CK-MB (Pico 18-24 h)',
+              data: ckmb,
+              borderColor: '#e11d48',
+              backgroundColor: 'rgba(225, 29, 72, 0.05)',
+              borderWidth: 3,
+              tension: 0.35,
+              fill: true
+            },
+            {
+              label: 'GOT / AST (Pico 24-48 h)',
+              data: gotAst,
+              borderColor: '#d97706',
+              borderWidth: 2.5,
+              tension: 0.35,
+              fill: false
+            },
+            {
+              label: 'LDH (Pico 72-96 h)',
+              data: ldh,
+              borderColor: '#0284c7',
+              borderWidth: 2.5,
+              tension: 0.35,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 12, font: { size: 10 } } },
+            tooltip: {
+              callbacks: {
+                label: (c) => `${c.dataset.label}: ${c.parsed.y}x valor basal`
+              }
+            }
+          },
+          scales: {
+            x: { title: { display: true, text: 'Horas Transcurridas desde el Inicio del Dolor Precordial' } },
+            y: { title: { display: true, text: 'Múltiplos del Límite Superior Normal (LSN)' }, min: 0 }
+          }
+        }
+      });
+    }
+
+    /* ================= 7. QUIZ / EVALUATION ================= */
+    function renderQuiz() {
+      const container = document.getElementById('quizContainer');
+      container.innerHTML = '';
+
+      quizQuestions.forEach((q, qIdx) => {
+        const qCard = document.createElement('div');
+        qCard.className = "p-5 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-3";
+        qCard.id = `qCard-${qIdx}`;
+
+        let optionsHtml = '';
+        q.options.forEach((opt, optIdx) => {
+          optionsHtml += `
+            <button onclick="selectQuizAnswer(${qIdx}, ${optIdx})" id="qOpt-${qIdx}-${optIdx}"
+                    class="w-full text-left p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-xs text-slate-700 font-medium transition-all flex items-start gap-2">
+              <span class="w-5 h-5 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
+                ${String.fromCharCode(65 + optIdx)}
+              </span>
+              <span>${opt}</span>
+            </button>
+          `;
+        });
+
+        qCard.innerHTML = `
+          <h4 class="font-bold text-slate-900 text-sm">${q.question}</h4>
+          <div class="space-y-2 mt-2">
+            ${optionsHtml}
+          </div>
+          <div id="qFeedback-${qIdx}" class="hidden p-3 rounded-xl text-xs mt-3"></div>
+        `;
+
+        container.appendChild(qCard);
+      });
+    }
+
+    function selectQuizAnswer(qIdx, optIdx) {
+      userAnswers[qIdx] = optIdx;
+      const question = quizQuestions[qIdx];
+      const feedback = document.getElementById(`qFeedback-${qIdx}`);
+      const isCorrect = optIdx === question.correct;
+
+      // Highlight selected and disable others
+      question.options.forEach((_, idx) => {
+        const btn = document.getElementById(`qOpt-${qIdx}-${idx}`);
+        btn.disabled = true;
+        if (idx === question.correct) {
+          btn.className = "w-full text-left p-3 rounded-xl border border-emerald-500 bg-emerald-50 text-xs text-emerald-900 font-bold flex items-start gap-2";
+        } else if (idx === optIdx && !isCorrect) {
+          btn.className = "w-full text-left p-3 rounded-xl border border-rose-400 bg-rose-50 text-xs text-rose-900 font-semibold flex items-start gap-2";
+        } else {
+          btn.className = "w-full text-left p-3 rounded-xl border border-slate-200 bg-slate-100 text-xs text-slate-400 opacity-60 flex items-start gap-2";
+        }
+      });
+
+      feedback.classList.remove('hidden');
+      if (isCorrect) {
+        feedback.className = "p-3 rounded-xl text-xs mt-3 bg-emerald-100 border border-emerald-200 text-emerald-900";
+        feedback.innerHTML = `<strong>¡Respuesta Correcta!</strong> ${question.explanation}`;
+      } else {
+        feedback.className = "p-3 rounded-xl text-xs mt-3 bg-rose-100 border border-rose-200 text-rose-900";
+        feedback.innerHTML = `<strong>Incorrecto.</strong> ${question.explanation}`;
+      }
+
+      // Update counter
+      document.getElementById('answeredCount').innerText = Object.keys(userAnswers).length;
+
+      renderMathInElement(feedback, {
+        delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false}
+        ],
+        throwOnError: false
+      });
+    }
+
+    function resetQuiz() {
+      userAnswers = {};
+      document.getElementById('answeredCount').innerText = '0';
+      renderQuiz();
+      renderMathInElement(document.getElementById('quizContainer'), {
+        delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false}
+        ],
+        throwOnError: false
+      });
+      showToast('Cuestionario reiniciado.', '📝');
+    }
+
+    /* Math rendering trigger */
+    function renderMathWhenReady() {
+      if (window.renderMathInElement) {
+        renderMathInElement(document.body, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false }
+          ],
+          ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'header'],
+          ignoredClasses: ['katex', 'katex-html', 'katex-mathml', 'ignore-math', 'no-math'],
+          throwOnError: false
+        });
+      }
+    }
+
+    /* Window load entry point */
+    window.onload = function() {
+      resizeReactionCanvas();
+      showEnzymeClass(1);
+      initMichaelisChart();
+      initMicroenvironmentCharts();
+      initInhibitionChart();
+      initIamChart();
+      updateAllostericSimulation();
+      switchTab('tab-termo');
+      setTimeout(renderMathWhenReady, 200);
+    };
+  </script>
+</body>
+</html>
